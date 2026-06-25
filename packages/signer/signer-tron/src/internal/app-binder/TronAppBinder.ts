@@ -1,4 +1,5 @@
 import {
+  CallTaskInAppDeviceAction,
   type DeviceManagementKit,
   type DeviceSessionId,
   SendCommandInAppDeviceAction,
@@ -8,9 +9,15 @@ import { inject, injectable } from "inversify";
 
 import { type GetAddressDAReturnType } from "@api/app-binder/GetAddressDeviceActionTypes";
 import { type GetAppConfigurationDAReturnType } from "@api/app-binder/GetAppConfigurationDeviceActionTypes";
+import { type SignPersonalMessageDAReturnType } from "@api/app-binder/SignPersonalMessageDeviceActionTypes";
+import { type SignTransactionDAReturnType } from "@api/app-binder/SignTransactionDeviceActionTypes";
+import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
 import { GetAddressCommand } from "@internal/app-binder/command/GetAddressCommand";
 import { GetAppConfigurationCommand } from "@internal/app-binder/command/GetAppConfigurationCommand";
+import { SignTransactionHashCommand } from "@internal/app-binder/command/SignTransactionHashCommand";
 import { APP_NAME } from "@internal/app-binder/constants";
+import { SendSignPersonalMessageTask } from "@internal/app-binder/task/SendSignPersonalMessageTask";
+import { SendSignTransactionTask } from "@internal/app-binder/task/SendSignTransactionTask";
 import { externalTypes } from "@internal/externalTypes";
 
 @injectable()
@@ -56,6 +63,72 @@ export class TronAppBinder {
           appName: APP_NAME,
           requiredUserInteraction: UserInteractionRequired.None,
           skipOpenApp: args.skipOpenApp,
+        },
+      }),
+    });
+  }
+
+  signTransaction(args: {
+    derivationPath: string;
+    rawData: Uint8Array;
+    skipOpenApp: boolean;
+  }): SignTransactionDAReturnType {
+    return this.dmk.executeDeviceAction({
+      sessionId: this.sessionId,
+      deviceAction: new CallTaskInAppDeviceAction({
+        input: {
+          task: async (internalApi) =>
+            new SendSignTransactionTask(internalApi, {
+              derivationPath: args.derivationPath,
+              rawData: args.rawData,
+            }).run(),
+          appName: APP_NAME,
+          requiredUserInteraction: UserInteractionRequired.SignTransaction,
+          skipOpenApp: args.skipOpenApp,
+        },
+      }),
+    });
+  }
+
+  signMessage(args: {
+    derivationPath: string;
+    message: Uint8Array;
+    fullDisplay: boolean;
+    skipOpenApp: boolean;
+  }): SignPersonalMessageDAReturnType {
+    return this.dmk.executeDeviceAction({
+      sessionId: this.sessionId,
+      deviceAction: new CallTaskInAppDeviceAction({
+        input: {
+          task: async (internalApi) =>
+            new SendSignPersonalMessageTask(internalApi, {
+              derivationPath: args.derivationPath,
+              message: args.message,
+              fullDisplay: args.fullDisplay,
+            }).run(),
+          appName: APP_NAME,
+          requiredUserInteraction: UserInteractionRequired.SignPersonalMessage,
+          skipOpenApp: args.skipOpenApp,
+        },
+      }),
+    });
+  }
+
+  signTransactionHash(args: {
+    derivationPath: string;
+    hash: Uint8Array;
+  }): SignTransactionHashDAReturnType {
+    return this.dmk.executeDeviceAction({
+      sessionId: this.sessionId,
+      deviceAction: new SendCommandInAppDeviceAction({
+        input: {
+          command: new SignTransactionHashCommand({
+            derivationPath: args.derivationPath,
+            hash: args.hash,
+          }),
+          appName: APP_NAME,
+          requiredUserInteraction: UserInteractionRequired.SignTransaction,
+          skipOpenApp: false,
         },
       }),
     });

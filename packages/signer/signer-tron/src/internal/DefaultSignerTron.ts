@@ -8,11 +8,17 @@ import { type GetAddressDAReturnType } from "@api/app-binder/GetAddressDeviceAct
 import { type GetAppConfigurationDAReturnType } from "@api/app-binder/GetAppConfigurationDeviceActionTypes";
 import { type SignPersonalMessageDAReturnType } from "@api/app-binder/SignPersonalMessageDeviceActionTypes";
 import { type SignTransactionDAReturnType } from "@api/app-binder/SignTransactionDeviceActionTypes";
+import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
 import { type AddressOptions } from "@api/model/AddressOptions";
 import { type MessageOptions } from "@api/model/MessageOptions";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
 import { type SignerTron } from "@api/SignerTron";
 import { makeContainer } from "@internal/di";
+import { messageTypes } from "@internal/message/di/messageTypes";
+import { type SignMessageUseCase } from "@internal/message/use-case/SignMessageUseCase";
+import { transactionTypes } from "@internal/transaction/di/transactionTypes";
+import { type SignTransactionHashUseCase } from "@internal/transaction/use-case/SignTransactionHashUseCase";
+import { type SignTransactionUseCase } from "@internal/transaction/use-case/SignTransactionUseCase";
 import { addressTypes } from "@internal/use-cases/address/di/addressTypes";
 import { type GetAddressUseCase } from "@internal/use-cases/address/GetAddressUseCase";
 import { appConfigTypes } from "@internal/use-cases/app-config/di/appConfigTypes";
@@ -47,21 +53,34 @@ export class DefaultSignerTron implements SignerTron {
       .execute();
   }
 
-  // TODO(Phase 1): wire to SignTransactionUseCase (INS_SIGN 0x04 / INS_SIGN_GCS 0xD4)
   signTransaction(
-    _derivationPath: string,
-    _rawData: Uint8Array,
-    _options?: TransactionOptions,
+    derivationPath: string,
+    rawData: Uint8Array,
+    options?: TransactionOptions,
   ): SignTransactionDAReturnType {
-    throw new Error("signTransaction is not implemented yet (Phase 1)");
+    return this._container
+      .get<SignTransactionUseCase>(transactionTypes.SignTransactionUseCase)
+      .execute(derivationPath, rawData, options);
   }
 
-  // TODO(Phase 1): wire to SignMessageUseCase (INS_SIGN_PERSONAL_MESSAGE 0x08 / 0xC8)
   signMessage(
-    _derivationPath: string,
-    _message: string | Uint8Array,
-    _options?: MessageOptions,
+    derivationPath: string,
+    message: string | Uint8Array,
+    options?: MessageOptions,
   ): SignPersonalMessageDAReturnType {
-    throw new Error("signMessage is not implemented yet (Phase 1)");
+    return this._container
+      .get<SignMessageUseCase>(messageTypes.SignMessageUseCase)
+      .execute(derivationPath, message, options);
+  }
+
+  signTransactionHash(
+    derivationPath: string,
+    hash: Uint8Array,
+  ): SignTransactionHashDAReturnType {
+    return this._container
+      .get<SignTransactionHashUseCase>(
+        transactionTypes.SignTransactionHashUseCase,
+      )
+      .execute(derivationPath, hash);
   }
 }
