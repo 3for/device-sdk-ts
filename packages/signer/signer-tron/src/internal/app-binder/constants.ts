@@ -1,0 +1,50 @@
+export const APP_NAME = "Tron";
+
+export const LEDGER_CLA = 0xe0;
+
+// Instruction set — see app-tron/src/apdu_constants.h
+export const INS = {
+  GET_PUBLIC_KEY: 0x02,
+  SIGN: 0x04,
+  SIGN_TXN_HASH: 0x05,
+  GET_APP_CONFIGURATION: 0x06,
+  SIGN_PERSONAL_MESSAGE: 0x08,
+  GET_ECDH_SECRET: 0x0a,
+  SIGN_TIP_712_MESSAGE: 0x0c,
+  PROVIDE_NFT_INFORMATION: 0x14,
+  TIP712_STRUCT_DEF: 0x1a,
+  TIP712_STRUCT_IMPL: 0x1c,
+  TIP712_FILTERING: 0x1e,
+  GET_CHALLENGE: 0x20,
+  PROVIDE_TRUSTED_NAME: 0x22,
+  PROVIDE_ENUM_VALUE: 0x24,
+  GTP_TRANSACTION_INFO: 0x26,
+  GTP_FIELD: 0x28,
+  PROVIDE_PROXY_INFO: 0x2a,
+  PROVIDE_GATING: 0x38,
+  PROVIDE_TRC20_TOKEN_INFORMATION: 0xca,
+  SIGN_PERSONAL_MESSAGE_FULL_DISPLAY: 0xc8,
+  SIGN_GCS: 0xd4,
+} as const;
+
+// P1 (see apdu_constants.h)
+export const P1 = {
+  NON_CONFIRM: 0x00,
+  CONFIRM: 0x01,
+  SIGN: 0x10,
+  FIRST: 0x00,
+  MORE: 0x80,
+  LAST: 0x90,
+  FIRST_CHUNK: 0x01,
+  TRC10_NAME: 0xa0,
+} as const;
+
+// P2 (see apdu_constants.h)
+export const P2 = {
+  NO_CHAINCODE: 0x00,
+  CHAINCODE: 0x01,
+  GCS_STORE: 0x10,
+  GCS_START_FLOW: 0x11,
+  TIP712_LEGACY_IMPLEM: 0x00,
+  TIP712_FULL_IMPLEM: 0x01,
+} as const;
