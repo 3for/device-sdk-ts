@@ -13,6 +13,12 @@ import {
   type SignTransactionDAError,
   type SignTransactionDAIntermediateValue,
   type SignTransactionDAOutput,
+  type SignTransactionHashDAError,
+  type SignTransactionHashDAIntermediateValue,
+  type SignTransactionHashDAOutput,
+  type SignTypedDataHashDAError,
+  type SignTypedDataHashDAIntermediateValue,
+  type SignTypedDataHashDAOutput,
 } from "@ledgerhq/device-signer-kit-tron";
 
 import { DeviceActionsList } from "@/components/DeviceActionsView/DeviceActionsList";
@@ -26,6 +32,11 @@ const DEFAULT_DERIVATION_PATH = "44'/195'/0'/0/0";
 // hw-app-trx signTransaction test vector.
 const SAMPLE_RAW_DATA =
   "0a023dce220895da42177db0050740d8e0a5feed2d522c43727970746f436861696e2d54726f6e5352204c6564676572205472616e73616374696f6e732054657374735a68080112640a2d747970652e676f6f676c65617069732e636f6d2f70726f746f636f6c2e5472616e73666572436f6e747261637412330a1541c8599111f29c1e1e061265b4af93ea1f274ad78a121541c8599111f29c1e1e061265b4af93ea1f274ad78a1880c2d72f709d94a2feed2d";
+
+// Arbitrary 32-byte hashes for the "sign by hash" smoke tests.
+const SAMPLE_HASH = `0x${"11".repeat(32)}`;
+const SAMPLE_DOMAIN_HASH = `0x${"22".repeat(32)}`;
+const SAMPLE_MESSAGE_HASH = `0x${"33".repeat(32)}`;
 
 export const SignerTronView: React.FC<{ sessionId: string }> = ({
   sessionId,
@@ -155,6 +166,56 @@ export const SignerTronView: React.FC<{ sessionId: string }> = ({
         },
         SignPersonalMessageDAError,
         SignPersonalMessageDAIntermediateValue
+      >,
+      {
+        title: "Sign Transaction Hash",
+        description:
+          "Unsafe: sign a 32-byte tx hash (requires 'sign by hash' setting)",
+        executeDeviceAction: ({ derivationPath, hash }) => {
+          if (!signer) {
+            throw new Error("Signer not initialized");
+          }
+          const bytes = hexaStringToBuffer(hash) ?? new Uint8Array();
+          return signer.signTransactionHash(derivationPath, bytes);
+        },
+        initialValues: {
+          derivationPath: DEFAULT_DERIVATION_PATH,
+          hash: SAMPLE_HASH,
+        },
+        deviceModelId,
+      } satisfies DeviceActionProps<
+        SignTransactionHashDAOutput,
+        { derivationPath: string; hash: string },
+        SignTransactionHashDAError,
+        SignTransactionHashDAIntermediateValue
+      >,
+      {
+        title: "Sign Typed Data (hashed)",
+        description:
+          "Sign TIP-712 from domain + message hashes (requires 'sign by hash')",
+        executeDeviceAction: ({ derivationPath, domainHash, messageHash }) => {
+          if (!signer) {
+            throw new Error("Signer not initialized");
+          }
+          const domain = hexaStringToBuffer(domainHash) ?? new Uint8Array();
+          const message = hexaStringToBuffer(messageHash) ?? new Uint8Array();
+          return signer.signTypedDataHash(derivationPath, domain, message);
+        },
+        initialValues: {
+          derivationPath: DEFAULT_DERIVATION_PATH,
+          domainHash: SAMPLE_DOMAIN_HASH,
+          messageHash: SAMPLE_MESSAGE_HASH,
+        },
+        deviceModelId,
+      } satisfies DeviceActionProps<
+        SignTypedDataHashDAOutput,
+        {
+          derivationPath: string;
+          domainHash: string;
+          messageHash: string;
+        },
+        SignTypedDataHashDAError,
+        SignTypedDataHashDAIntermediateValue
       >,
     ],
     [deviceModelId, signer],

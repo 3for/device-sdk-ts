@@ -3,6 +3,7 @@ import { type GetAppConfigurationDAReturnType } from "@api/app-binder/GetAppConf
 import { type SignPersonalMessageDAReturnType } from "@api/app-binder/SignPersonalMessageDeviceActionTypes";
 import { type SignTransactionDAReturnType } from "@api/app-binder/SignTransactionDeviceActionTypes";
 import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
+import { type SignTypedDataHashDAReturnType } from "@api/app-binder/SignTypedDataHashDeviceActionTypes";
 import { type AddressOptions } from "@api/model/AddressOptions";
 import { type MessageOptions } from "@api/model/MessageOptions";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
@@ -44,4 +45,15 @@ export interface SignerTron {
     derivationPath: string,
     hash: Uint8Array,
   ) => SignTransactionHashDAReturnType;
+
+  /**
+   * Sign a TIP-712 typed message from its pre-computed hashes
+   * (domain separator + hashStruct(message)). Requires the "sign by hash"
+   * device setting to be enabled.
+   */
+  signTypedDataHash: (
+    derivationPath: string,
+    domainHash: Uint8Array,
+    messageHash: Uint8Array,
+  ) => SignTypedDataHashDAReturnType;
 }

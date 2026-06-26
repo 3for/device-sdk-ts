@@ -9,6 +9,7 @@ import { type GetAppConfigurationDAReturnType } from "@api/app-binder/GetAppConf
 import { type SignPersonalMessageDAReturnType } from "@api/app-binder/SignPersonalMessageDeviceActionTypes";
 import { type SignTransactionDAReturnType } from "@api/app-binder/SignTransactionDeviceActionTypes";
 import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
+import { type SignTypedDataHashDAReturnType } from "@api/app-binder/SignTypedDataHashDeviceActionTypes";
 import { type AddressOptions } from "@api/model/AddressOptions";
 import { type MessageOptions } from "@api/model/MessageOptions";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
@@ -19,6 +20,8 @@ import { type SignMessageUseCase } from "@internal/message/use-case/SignMessageU
 import { transactionTypes } from "@internal/transaction/di/transactionTypes";
 import { type SignTransactionHashUseCase } from "@internal/transaction/use-case/SignTransactionHashUseCase";
 import { type SignTransactionUseCase } from "@internal/transaction/use-case/SignTransactionUseCase";
+import { typedDataTypes } from "@internal/typed-data/di/typedDataTypes";
+import { type SignTypedDataHashUseCase } from "@internal/typed-data/use-case/SignTypedDataHashUseCase";
 import { addressTypes } from "@internal/use-cases/address/di/addressTypes";
 import { type GetAddressUseCase } from "@internal/use-cases/address/GetAddressUseCase";
 import { appConfigTypes } from "@internal/use-cases/app-config/di/appConfigTypes";
@@ -82,5 +85,15 @@ export class DefaultSignerTron implements SignerTron {
         transactionTypes.SignTransactionHashUseCase,
       )
       .execute(derivationPath, hash);
+  }
+
+  signTypedDataHash(
+    derivationPath: string,
+    domainHash: Uint8Array,
+    messageHash: Uint8Array,
+  ): SignTypedDataHashDAReturnType {
+    return this._container
+      .get<SignTypedDataHashUseCase>(typedDataTypes.SignTypedDataHashUseCase)
+      .execute(derivationPath, domainHash, messageHash);
   }
 }
