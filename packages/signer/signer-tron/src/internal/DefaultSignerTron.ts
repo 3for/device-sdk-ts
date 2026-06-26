@@ -9,10 +9,13 @@ import { type GetAppConfigurationDAReturnType } from "@api/app-binder/GetAppConf
 import { type SignPersonalMessageDAReturnType } from "@api/app-binder/SignPersonalMessageDeviceActionTypes";
 import { type SignTransactionDAReturnType } from "@api/app-binder/SignTransactionDeviceActionTypes";
 import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
+import { type SignTypedDataDAReturnType } from "@api/app-binder/SignTypedDataDeviceActionTypes";
 import { type SignTypedDataHashDAReturnType } from "@api/app-binder/SignTypedDataHashDeviceActionTypes";
 import { type AddressOptions } from "@api/model/AddressOptions";
 import { type MessageOptions } from "@api/model/MessageOptions";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
+import { type TypedData } from "@api/model/TypedData";
+import { type TypedDataOptions } from "@api/model/TypedDataOptions";
 import { type SignerTron } from "@api/SignerTron";
 import { makeContainer } from "@internal/di";
 import { messageTypes } from "@internal/message/di/messageTypes";
@@ -22,6 +25,7 @@ import { type SignTransactionHashUseCase } from "@internal/transaction/use-case/
 import { type SignTransactionUseCase } from "@internal/transaction/use-case/SignTransactionUseCase";
 import { typedDataTypes } from "@internal/typed-data/di/typedDataTypes";
 import { type SignTypedDataHashUseCase } from "@internal/typed-data/use-case/SignTypedDataHashUseCase";
+import { type SignTypedDataUseCase } from "@internal/typed-data/use-case/SignTypedDataUseCase";
 import { addressTypes } from "@internal/use-cases/address/di/addressTypes";
 import { type GetAddressUseCase } from "@internal/use-cases/address/GetAddressUseCase";
 import { appConfigTypes } from "@internal/use-cases/app-config/di/appConfigTypes";
@@ -95,5 +99,15 @@ export class DefaultSignerTron implements SignerTron {
     return this._container
       .get<SignTypedDataHashUseCase>(typedDataTypes.SignTypedDataHashUseCase)
       .execute(derivationPath, domainHash, messageHash);
+  }
+
+  signTypedData(
+    derivationPath: string,
+    typedData: TypedData,
+    options?: TypedDataOptions,
+  ): SignTypedDataDAReturnType {
+    return this._container
+      .get<SignTypedDataUseCase>(typedDataTypes.SignTypedDataUseCase)
+      .execute(derivationPath, typedData, options);
   }
 }

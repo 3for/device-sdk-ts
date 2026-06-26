@@ -29,6 +29,12 @@ export {
   type SignTransactionHashDAReturnType,
 } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
 export {
+  type SignTypedDataDAError,
+  type SignTypedDataDAIntermediateValue,
+  type SignTypedDataDAOutput,
+  type SignTypedDataDAReturnType,
+} from "@api/app-binder/SignTypedDataDeviceActionTypes";
+export {
   type SignTypedDataHashDAError,
   type SignTypedDataHashDAIntermediateValue,
   type SignTypedDataHashDAOutput,
@@ -40,5 +46,11 @@ export { type AppConfiguration } from "@api/model/AppConfiguration";
 export { type MessageOptions } from "@api/model/MessageOptions";
 export { type Signature } from "@api/model/Signature";
 export { type TransactionOptions } from "@api/model/TransactionOptions";
+export {
+  type TypedData,
+  type TypedDataDomain,
+  type TypedDataField,
+} from "@api/model/TypedData";
+export { type TypedDataOptions } from "@api/model/TypedDataOptions";
 export { type SignerTron } from "@api/SignerTron";
 export { SignerTronBuilder } from "@api/SignerTronBuilder";

@@ -16,9 +16,13 @@ import {
   type SignTransactionHashDAError,
   type SignTransactionHashDAIntermediateValue,
   type SignTransactionHashDAOutput,
+  type SignTypedDataDAError,
+  type SignTypedDataDAIntermediateValue,
+  type SignTypedDataDAOutput,
   type SignTypedDataHashDAError,
   type SignTypedDataHashDAIntermediateValue,
   type SignTypedDataHashDAOutput,
+  type TypedData,
 } from "@ledgerhq/device-signer-kit-tron";
 
 import { DeviceActionsList } from "@/components/DeviceActionsView/DeviceActionsList";
@@ -37,6 +41,40 @@ const SAMPLE_RAW_DATA =
 const SAMPLE_HASH = `0x${"11".repeat(32)}`;
 const SAMPLE_DOMAIN_HASH = `0x${"22".repeat(32)}`;
 const SAMPLE_MESSAGE_HASH = `0x${"33".repeat(32)}`;
+
+// Canonical EIP-712 "Mail" example (TIP-712 reuses the same structure).
+const SAMPLE_TYPED_DATA = JSON.stringify(
+  {
+    domain: {
+      name: "Ether Mail",
+      version: "1",
+      chainId: 1,
+      verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
+    },
+    types: {
+      Person: [
+        { name: "name", type: "string" },
+        { name: "wallet", type: "address" },
+      ],
+      Mail: [
+        { name: "from", type: "Person" },
+        { name: "to", type: "Person" },
+        { name: "contents", type: "string" },
+      ],
+    },
+    primaryType: "Mail",
+    message: {
+      from: {
+        name: "Cow",
+        wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+      },
+      to: { name: "Bob", wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB" },
+      contents: "Hello, Bob!",
+    },
+  },
+  null,
+  2,
+);
 
 export const SignerTronView: React.FC<{ sessionId: string }> = ({
   sessionId,
@@ -216,6 +254,32 @@ export const SignerTronView: React.FC<{ sessionId: string }> = ({
         },
         SignTypedDataHashDAError,
         SignTypedDataHashDAIntermediateValue
+      >,
+      {
+        title: "Sign Typed Data",
+        description: "Sign TIP-712 typed data (full struct-def/impl flow)",
+        executeDeviceAction: ({ derivationPath, typedData, skipOpenApp }) => {
+          if (!signer) {
+            throw new Error("Signer not initialized");
+          }
+          const parsed = JSON.parse(typedData) as TypedData;
+          return signer.signTypedData(derivationPath, parsed, { skipOpenApp });
+        },
+        initialValues: {
+          derivationPath: DEFAULT_DERIVATION_PATH,
+          typedData: SAMPLE_TYPED_DATA,
+          skipOpenApp: false,
+        },
+        deviceModelId,
+      } satisfies DeviceActionProps<
+        SignTypedDataDAOutput,
+        {
+          derivationPath: string;
+          typedData: string;
+          skipOpenApp?: boolean;
+        },
+        SignTypedDataDAError,
+        SignTypedDataDAIntermediateValue
       >,
     ],
     [deviceModelId, signer],

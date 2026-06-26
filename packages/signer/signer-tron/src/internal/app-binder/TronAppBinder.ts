@@ -12,7 +12,9 @@ import { type GetAppConfigurationDAReturnType } from "@api/app-binder/GetAppConf
 import { type SignPersonalMessageDAReturnType } from "@api/app-binder/SignPersonalMessageDeviceActionTypes";
 import { type SignTransactionDAReturnType } from "@api/app-binder/SignTransactionDeviceActionTypes";
 import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
+import { type SignTypedDataDAReturnType } from "@api/app-binder/SignTypedDataDeviceActionTypes";
 import { type SignTypedDataHashDAReturnType } from "@api/app-binder/SignTypedDataHashDeviceActionTypes";
+import { type TypedData } from "@api/model/TypedData";
 import { GetAddressCommand } from "@internal/app-binder/command/GetAddressCommand";
 import { GetAppConfigurationCommand } from "@internal/app-binder/command/GetAppConfigurationCommand";
 import { SignTIP712HashCommand } from "@internal/app-binder/command/SignTIP712HashCommand";
@@ -20,7 +22,9 @@ import { SignTransactionHashCommand } from "@internal/app-binder/command/SignTra
 import { APP_NAME } from "@internal/app-binder/constants";
 import { SendSignPersonalMessageTask } from "@internal/app-binder/task/SendSignPersonalMessageTask";
 import { SendSignTransactionTask } from "@internal/app-binder/task/SendSignTransactionTask";
+import { SignTypedDataTask } from "@internal/app-binder/task/SignTypedDataTask";
 import { externalTypes } from "@internal/externalTypes";
+import { type TypedDataParserService } from "@internal/typed-data/service/TypedDataParserService";
 
 @injectable()
 export class TronAppBinder {
@@ -131,6 +135,30 @@ export class TronAppBinder {
           appName: APP_NAME,
           requiredUserInteraction: UserInteractionRequired.SignTransaction,
           skipOpenApp: false,
+        },
+      }),
+    });
+  }
+
+  signTypedData(args: {
+    derivationPath: string;
+    data: TypedData;
+    parser: TypedDataParserService;
+    skipOpenApp: boolean;
+  }): SignTypedDataDAReturnType {
+    return this.dmk.executeDeviceAction({
+      sessionId: this.sessionId,
+      deviceAction: new CallTaskInAppDeviceAction({
+        input: {
+          task: async (internalApi) =>
+            new SignTypedDataTask(internalApi, {
+              derivationPath: args.derivationPath,
+              data: args.data,
+              parser: args.parser,
+            }).run(),
+          appName: APP_NAME,
+          requiredUserInteraction: UserInteractionRequired.SignTypedData,
+          skipOpenApp: args.skipOpenApp,
         },
       }),
     });
