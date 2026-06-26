@@ -910,6 +910,9 @@ importers:
       '@ledgerhq/device-signer-kit-solana':
         specifier: workspace:^
         version: link:../../packages/signer/signer-solana
+      '@ledgerhq/device-signer-kit-tron':
+        specifier: workspace:^
+        version: link:../../packages/signer/signer-tron
       '@ledgerhq/device-signer-kit-zcash':
         specifier: workspace:^
         version: link:../../packages/signer/signer-zcash
