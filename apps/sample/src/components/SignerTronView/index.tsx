@@ -22,6 +22,9 @@ import {
   type SignTypedDataHashDAError,
   type SignTypedDataHashDAIntermediateValue,
   type SignTypedDataHashDAOutput,
+  type TronClearSignContext,
+  TronClearSignContextType,
+  type TronClearSigningMode,
   type TypedData,
 } from "@ledgerhq/device-signer-kit-tron";
 
@@ -41,6 +44,12 @@ const SAMPLE_RAW_DATA =
 const SAMPLE_HASH = `0x${"11".repeat(32)}`;
 const SAMPLE_DOMAIN_HASH = `0x${"22".repeat(32)}`;
 const SAMPLE_MESSAGE_HASH = `0x${"33".repeat(32)}`;
+
+const CLEAR_SIGNING_MODE_OPTIONS = [
+  { label: "auto", value: "auto" },
+  { label: "gcs", value: "gcs" },
+  { label: "blind", value: "blind" },
+];
 
 // Canonical EIP-712 "Mail" example (TIP-712 reuses the same structure).
 const SAMPLE_TYPED_DATA = JSON.stringify(
@@ -75,6 +84,40 @@ const SAMPLE_TYPED_DATA = JSON.stringify(
   null,
   2,
 );
+
+function parseContextsJson(contextsJson: string): TronClearSignContext[] {
+  const trimmed = contextsJson.trim();
+  if (trimmed === "") {
+    return [];
+  }
+
+  const contexts = JSON.parse(trimmed) as unknown;
+  if (!Array.isArray(contexts)) {
+    throw new Error("contextsJson must be an array");
+  }
+
+  const allowedTypes = new Set<string>(Object.values(TronClearSignContextType));
+  return contexts.map((context, index) => {
+    const record =
+      typeof context === "object" && context !== null
+        ? (context as Record<string, unknown>)
+        : null;
+
+    if (
+      record === null ||
+      typeof record.type !== "string" ||
+      typeof record.payload !== "string" ||
+      !allowedTypes.has(record.type)
+    ) {
+      throw new Error(`Invalid context at index ${index}`);
+    }
+
+    return {
+      type: record.type as TronClearSignContextType,
+      payload: record.payload,
+    };
+  });
+}
 
 export const SignerTronView: React.FC<{ sessionId: string }> = ({
   sessionId,
@@ -144,20 +187,49 @@ export const SignerTronView: React.FC<{ sessionId: string }> = ({
       >,
       {
         title: "Sign Transaction",
-        description: "Blind-sign a Tron raw_data (protobuf) transaction",
-        executeDeviceAction: ({ derivationPath, rawData, skipOpenApp }) => {
+        description:
+          "Sign a Tron raw_data transaction with blind signing or GCS clear-signing contexts",
+        executeDeviceAction: ({
+          derivationPath,
+          rawData,
+          clearSigningMode,
+          contextsJson,
+          skipOpenApp,
+        }) => {
           if (!signer) {
             throw new Error("Signer not initialized");
           }
           const bytes = hexaStringToBuffer(rawData) ?? new Uint8Array();
+          const contexts = parseContextsJson(contextsJson);
           return signer.signTransaction(derivationPath, bytes, {
             skipOpenApp,
+            clearSigningMode: clearSigningMode as TronClearSigningMode,
+            contexts,
           });
         },
         initialValues: {
           derivationPath: DEFAULT_DERIVATION_PATH,
           rawData: SAMPLE_RAW_DATA,
+          clearSigningMode: "auto",
+          contextsJson: "",
           skipOpenApp: false,
+        },
+        validateValues: ({ rawData, contextsJson }) => {
+          try {
+            if (!hexaStringToBuffer(rawData)) {
+              return false;
+            }
+            parseContextsJson(contextsJson);
+          } catch {
+            return false;
+          }
+          return true;
+        },
+        valueSelector: {
+          clearSigningMode: CLEAR_SIGNING_MODE_OPTIONS,
+        },
+        labelSelector: {
+          contextsJson: "contexts JSON",
         },
         deviceModelId,
       } satisfies DeviceActionProps<
@@ -165,6 +237,8 @@ export const SignerTronView: React.FC<{ sessionId: string }> = ({
         {
           derivationPath: string;
           rawData: string;
+          clearSigningMode: string;
+          contextsJson: string;
           skipOpenApp?: boolean;
         },
         SignTransactionDAError,
