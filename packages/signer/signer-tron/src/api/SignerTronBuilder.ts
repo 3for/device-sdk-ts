@@ -4,12 +4,13 @@ import {
 } from "@ledgerhq/device-management-kit";
 
 import { type TronContextModule } from "@api/model/TronContextModule";
-import { EmptyTronContextModule } from "@internal/context/EmptyTronContextModule";
+import { DefaultTronContextModule } from "@internal/context/DefaultTronContextModule";
 import { DefaultSignerTron } from "@internal/DefaultSignerTron";
 
 type SignerTronBuilderConstructorArgs = {
   dmk: DeviceManagementKit;
   sessionId: DeviceSessionId;
+  originToken?: string;
 };
 
 /**
@@ -18,11 +19,17 @@ type SignerTronBuilderConstructorArgs = {
 export class SignerTronBuilder {
   private readonly _dmk: DeviceManagementKit;
   private readonly _sessionId: DeviceSessionId;
+  private readonly _originToken: string | undefined;
   private _customContextModule: TronContextModule | undefined;
 
-  constructor({ dmk, sessionId }: SignerTronBuilderConstructorArgs) {
+  constructor({
+    dmk,
+    sessionId,
+    originToken,
+  }: SignerTronBuilderConstructorArgs) {
     this._dmk = dmk;
     this._sessionId = sessionId;
+    this._originToken = originToken;
   }
 
   /**
@@ -45,7 +52,11 @@ export class SignerTronBuilder {
     return new DefaultSignerTron({
       dmk: this._dmk,
       sessionId: this._sessionId,
-      contextModule: this._customContextModule ?? new EmptyTronContextModule(),
+      contextModule:
+        this._customContextModule ??
+        new DefaultTronContextModule({
+          originToken: this._originToken,
+        }),
     });
   }
 }

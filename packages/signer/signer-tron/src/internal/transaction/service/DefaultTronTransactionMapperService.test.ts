@@ -10,6 +10,14 @@ const TRANSFER_RAW_DATA = Uint8Array.from(
   ),
 );
 
+// Real TransferAssetContract raw_data for TRC10 USDT (token id 1000259).
+const TRANSFER_ASSET_RAW_DATA = Uint8Array.from(
+  Buffer.from(
+    "0a023dce220895da42177db0050740d8e0a5feed2d5a75080212710a32747970652e676f6f676c65617069732e636f6d2f70726f746f636f6c2e5472616e736665724173736574436f6e7472616374123b0a0731303030323539121541c8599111f29c1e1e061265b4af93ea1f274ad78a1a1541c8599111f29c1e1e061265b4af93ea1f274ad78a20c0843d709d94a2feed2d",
+    "hex",
+  ),
+);
+
 describe("DefaultTronTransactionMapperService", () => {
   const mapper = new DefaultTronTransactionMapperService();
 
@@ -35,5 +43,22 @@ describe("DefaultTronTransactionMapperService", () => {
   it("should expose undecoded contracts via raw bytes", () => {
     const subset = mapper.map(TRANSFER_RAW_DATA);
     expect(subset.contracts[0]!.raw.length).toBeGreaterThan(0);
+  });
+
+  it("should decode a TransferAssetContract TRC10 token id", () => {
+    const subset = mapper.map(TRANSFER_ASSET_RAW_DATA);
+
+    expect(subset.contracts).toHaveLength(1);
+
+    const contract = subset.contracts[0]!;
+    expect(contract.type).toBe(TronContractType.TransferAssetContract);
+    expect(contract.typeName).toBe("TransferAssetContract");
+    expect(contract.typeUrl).toBe(
+      "type.googleapis.com/protocol.TransferAssetContract",
+    );
+    expect(contract.assetName).toBe("1000259");
+    expect(contract.ownerAddress).toBe("TUEZSdKsoDHQMeZwihtdoBiN46zxhGWYdH");
+    expect(contract.toAddress).toBe("TUEZSdKsoDHQMeZwihtdoBiN46zxhGWYdH");
+    expect(contract.amount).toBe(1000000n);
   });
 });

@@ -15,6 +15,7 @@ import {
 
 import { useDmk } from "@/providers/DeviceManagementKitProvider";
 import { selectSelectedSessionId } from "@/state/sessions/selectors";
+import { selectOriginToken } from "@/state/settings/selectors";
 
 type SignerTronContextType = {
   signer: SignerTron | null;
@@ -31,6 +32,7 @@ export const SignerTronProvider: React.FC<PropsWithChildren> = ({
 }) => {
   const dmk = useDmk();
   const sessionId = useSelector(selectSelectedSessionId);
+  const originToken = useSelector(selectOriginToken);
 
   const [signer, setSigner] = useState<SignerTron | null>(null);
 
@@ -43,9 +45,10 @@ export const SignerTronProvider: React.FC<PropsWithChildren> = ({
     const newSigner = new SignerTronBuilder({
       dmk,
       sessionId,
+      originToken,
     }).build();
     setSigner(newSigner);
-  }, [dmk, sessionId]);
+  }, [dmk, originToken, sessionId]);
 
   return (
     <SignerTronContext.Provider

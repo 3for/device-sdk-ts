@@ -2,6 +2,7 @@ import { type DeviceManagementKit } from "@ledgerhq/device-management-kit";
 
 import { type TronContextModule } from "@api/model/TronContextModule";
 import { SignerTronBuilder } from "@api/SignerTronBuilder";
+import { DefaultTronContextModule } from "@internal/context/DefaultTronContextModule";
 import { DefaultSignerTron } from "@internal/DefaultSignerTron";
 import { externalTypes } from "@internal/externalTypes";
 
@@ -26,7 +27,7 @@ describe("SignerTronBuilder", () => {
     );
 
     expect(signer).toBeInstanceOf(DefaultSignerTron);
-    expect(contextModule).toBeDefined();
+    expect(contextModule).toBeInstanceOf(DefaultTronContextModule);
   });
 
   test("should instantiate with custom context module", () => {

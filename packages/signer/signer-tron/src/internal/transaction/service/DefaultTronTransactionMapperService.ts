@@ -152,11 +152,12 @@ export class DefaultTronTransactionMapperService
       case TronContractType.TransferContract:
         // owner_address=1, to_address=2, amount=3
         return this.decodeTransfer(value);
+      case TronContractType.TransferAssetContract:
+        return this.decodeTransferAsset(value);
       case TronContractType.TriggerSmartContract:
         return this.decodeTriggerSmartContract(value);
       default:
-        // Other contracts (incl. TransferAssetContract, which uses a different
-        // field layout) are exposed via `raw` for now; decoders are added per
+        // Other contracts are exposed via `raw` for now; decoders are added per
         // contract as later phases need them.
         return {};
     }
@@ -175,6 +176,32 @@ export class DefaultTronTransactionMapperService
       } else if (field === 2 && wire === WireType.LENGTH_DELIMITED) {
         out.toAddress = toBase58(reader.bytes());
       } else if (field === 3 && wire === WireType.VARINT) {
+        out.amount = reader.varint();
+      } else {
+        reader.skip(wire);
+      }
+    }
+    return out;
+  }
+
+  private decodeTransferAsset(buf: Uint8Array): Partial<TronContract> {
+    const reader = new ProtobufReader(buf);
+    const out: {
+      assetName?: string;
+      ownerAddress?: string;
+      toAddress?: string;
+      amount?: bigint;
+    } = {};
+    while (!reader.eof) {
+      const { field, wire } = reader.tag();
+      // TransferAssetContract: asset_name=1, owner_address=2, to_address=3, amount=4
+      if (field === 1 && wire === WireType.LENGTH_DELIMITED) {
+        out.assetName = new TextDecoder().decode(reader.bytes());
+      } else if (field === 2 && wire === WireType.LENGTH_DELIMITED) {
+        out.ownerAddress = toBase58(reader.bytes());
+      } else if (field === 3 && wire === WireType.LENGTH_DELIMITED) {
+        out.toAddress = toBase58(reader.bytes());
+      } else if (field === 4 && wire === WireType.VARINT) {
         out.amount = reader.varint();
       } else {
         reader.skip(wire);

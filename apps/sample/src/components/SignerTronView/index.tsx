@@ -47,19 +47,6 @@ const SAMPLE_RAW_DATA =
 const SAMPLE_TRC10_USDT_RAW_DATA =
   "0a023dce220895da42177db0050740d8e0a5feed2d5a75080212710a32747970652e676f6f676c65617069732e636f6d2f70726f746f636f6c2e5472616e736665724173736574436f6e7472616374123b0a0731303030323539121541c8599111f29c1e1e061265b4af93ea1f274ad78a1a1541c8599111f29c1e1e061265b4af93ea1f274ad78a20c0843d709d94a2feed2d";
 
-const SAMPLE_TRC10_USDT_CONTEXTS_JSON = JSON.stringify(
-  [
-    {
-      type: TronClearSignContextType.TRC10_TOKEN,
-      payload:
-        "0a045553445410001a46304402205170f03cc9c5987f873c74df9e3dd79ce3639071eb227377172d7b4960c82b0a022002e76314c9aa88d654e8918f9e5dafa53672d1f1370be04dcf90164879398eee",
-      tokenIndex: 0,
-    },
-  ],
-  null,
-  2,
-);
-
 const SAMPLE_ECDH_PUBLIC_KEY =
   "04ff21f8e64d3a3c0198edfbb7afdc79be959432e92e2f8a1984bb436a414b8edcec0345aad0c1bf7da04fd036dd7f9f617e30669224283d950fab9dd84831dc83";
 
@@ -278,7 +265,7 @@ export const SignerTronView: React.FC<{ sessionId: string }> = ({
           return signer.signTransaction(derivationPath, bytes, {
             skipOpenApp,
             clearSigningMode: clearSigningMode as TronClearSigningMode,
-            contexts,
+            contexts: contexts.length > 0 ? contexts : undefined,
           });
         },
         initialValues: {
@@ -337,14 +324,14 @@ export const SignerTronView: React.FC<{ sessionId: string }> = ({
           return signer.signTransaction(derivationPath, bytes, {
             skipOpenApp,
             clearSigningMode: clearSigningMode as TronClearSigningMode,
-            contexts,
+            contexts: contexts.length > 0 ? contexts : undefined,
           });
         },
         initialValues: {
           derivationPath: DEFAULT_DERIVATION_PATH,
           rawData: SAMPLE_TRC10_USDT_RAW_DATA,
           clearSigningMode: "auto",
-          contextsJson: SAMPLE_TRC10_USDT_CONTEXTS_JSON,
+          contextsJson: "",
           skipOpenApp: false,
         },
         validateValues: ({ rawData, contextsJson }) => {
@@ -352,14 +339,11 @@ export const SignerTronView: React.FC<{ sessionId: string }> = ({
             if (!hexaStringToBuffer(rawData)) {
               return false;
             }
-            const contexts = parseContextsJson(contextsJson);
-            return contexts.some(
-              (context) =>
-                context.type === TronClearSignContextType.TRC10_TOKEN,
-            );
+            parseContextsJson(contextsJson);
           } catch {
             return false;
           }
+          return true;
         },
         valueSelector: {
           clearSigningMode: CLEAR_SIGNING_MODE_OPTIONS,

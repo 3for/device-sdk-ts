@@ -57,6 +57,8 @@ export type TronContract = {
   readonly ownerAddress?: string;
   readonly toAddress?: string;
   readonly contractAddress?: string;
+  /** TRC10 token identifier from TransferAssetContract.asset_name. */
+  readonly assetName?: string;
   readonly amount?: bigint;
   readonly callValue?: bigint;
   /** EVM calldata for TriggerSmartContract (4-byte selector + ABI args), hex. */
