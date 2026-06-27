@@ -9,11 +9,17 @@ import { ProvideNFTInformationCommand } from "./ProvideNFTInformationCommand";
 import { ProvideProxyInfoCommand } from "./ProvideProxyInfoCommand";
 import { ProvideTransactionFieldDescriptionCommand } from "./ProvideTransactionFieldDescriptionCommand";
 import { ProvideTransactionInformationCommand } from "./ProvideTransactionInformationCommand";
+import { ProvideTrc10TokenNameCommand } from "./ProvideTrc10TokenNameCommand";
 import { ProvideTrc20TokenInformationCommand } from "./ProvideTrc20TokenInformationCommand";
 import { ProvideTrustedNameCommand } from "./ProvideTrustedNameCommand";
 
 const OK = Uint8Array.from([0x90, 0x00]);
 const DATA = Uint8Array.from([0xaa, 0xbb]);
+const SIGNATURE_DATA = Uint8Array.from([
+  ...new Array(32).fill(0x01),
+  ...new Array(32).fill(0x02),
+  0x01,
+]);
 
 describe("provide context commands", () => {
   it.each([
@@ -83,6 +89,33 @@ describe("provide context commands", () => {
     expect(isSuccessCommandResult(result)).toBe(true);
     if (isSuccessCommandResult(result)) {
       expect(result.data).toStrictEqual({ tokenIndex: 7 });
+    }
+  });
+
+  it("should build the TRC10 token name APDU and parse the final signature", () => {
+    const command = new ProvideTrc10TokenNameCommand({
+      payload: "0a04555344541000",
+      tokenIndex: 1,
+      isLast: true,
+    });
+
+    expect(command.getApdu().getRawApdu()).toStrictEqual(
+      Uint8Array.from([
+        0xe0, 0x04, 0xa9, 0x00, 0x08, 0x0a, 0x04, 0x55, 0x53, 0x44, 0x54, 0x10,
+        0x00,
+      ]),
+    );
+
+    const result = command.parseResponse(
+      new ApduResponse({ statusCode: OK, data: SIGNATURE_DATA }),
+    );
+    expect(isSuccessCommandResult(result)).toBe(true);
+    if (isSuccessCommandResult(result)) {
+      expect(result.data.unsafeCoerce()).toStrictEqual({
+        r: `0x${"01".repeat(32)}`,
+        s: `0x${"02".repeat(32)}`,
+        v: 1,
+      });
     }
   });
 

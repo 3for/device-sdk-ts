@@ -21,7 +21,11 @@ import {
   SignTransactionDAStep,
 } from "@api/app-binder/SignTransactionDeviceActionTypes";
 import { type Signature } from "@api/model/Signature";
-import { type TronClearSignContext } from "@api/model/TronClearSignContext";
+import {
+  type TronClearSignContext,
+  TronClearSignContextType,
+  type TronTrc10TokenContext,
+} from "@api/model/TronClearSignContext";
 import { type TronErrorCodes } from "@internal/app-binder/command/utils/tronApplicationErrors";
 import { APP_NAME } from "@internal/app-binder/constants";
 import { BuildTronContextsTask } from "@internal/app-binder/task/BuildTronContextsTask";
@@ -36,6 +40,7 @@ type MachineDependencies = {
     readonly input: {
       readonly derivationPath: string;
       readonly rawData: Uint8Array;
+      readonly contexts?: TronTrc10TokenContext[];
     };
   }) => Promise<CommandResult<Signature, TronErrorCodes>>;
   readonly signGcsTransaction: (args: {
@@ -46,6 +51,16 @@ type MachineDependencies = {
     };
   }) => Promise<CommandResult<Signature, TronErrorCodes>>;
 };
+
+function isTrc10TokenContext(
+  context: TronClearSignContext,
+): context is TronTrc10TokenContext {
+  return context.type === TronClearSignContextType.TRC10_TOKEN;
+}
+
+function isGcsContext(context: TronClearSignContext): boolean {
+  return !isTrc10TokenContext(context);
+}
 
 export class SignTransactionDeviceAction extends XStateDeviceAction<
   SignTransactionDAOutput,
@@ -95,7 +110,7 @@ export class SignTransactionDeviceAction extends XStateDeviceAction<
         shouldUseGcsWithContexts: ({ context }) =>
           this.input.options.clearSigningMode === "gcs" ||
           (this.input.options.clearSigningMode !== "blind" &&
-            context._internalState.contexts.length > 0),
+            context._internalState.contexts.some(isGcsContext)),
         noInternalError: ({ context }) => context._internalState.error === null,
       },
       actions: {
@@ -254,7 +269,7 @@ export class SignTransactionDeviceAction extends XStateDeviceAction<
             input: ({ context }) => ({
               derivationPath: context.input.derivationPath,
               rawData: context.input.rawData,
-              contexts: context._internalState.contexts,
+              contexts: context._internalState.contexts.filter(isGcsContext),
             }),
             onDone: {
               target: "SignTransactionResultCheck",
@@ -285,6 +300,8 @@ export class SignTransactionDeviceAction extends XStateDeviceAction<
             input: ({ context }) => ({
               derivationPath: context.input.derivationPath,
               rawData: context.input.rawData,
+              contexts:
+                context._internalState.contexts.filter(isTrc10TokenContext),
             }),
             onDone: {
               target: "SignTransactionResultCheck",
@@ -335,6 +352,7 @@ export class SignTransactionDeviceAction extends XStateDeviceAction<
         new SendSignTransactionTask(internalApi, {
           derivationPath: input.derivationPath,
           rawData: input.rawData,
+          contexts: input.contexts,
         }).run(),
       signGcsTransaction: ({ input }) =>
         new SendSignGcsTransactionTask(internalApi, {

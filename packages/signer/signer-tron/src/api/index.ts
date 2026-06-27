@@ -52,6 +52,7 @@ export {
 export {
   type TronClearSignContext,
   TronClearSignContextType,
+  type TronTrc10TokenContext,
 } from "@api/model/TronClearSignContext";
 export {
   type TronContextModule,

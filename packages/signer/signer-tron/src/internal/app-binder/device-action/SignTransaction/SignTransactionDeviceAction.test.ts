@@ -65,10 +65,10 @@ describe("SignTransactionDeviceAction", () => {
     expect(buildContextsInput.rawData).toBe(INPUT.rawData);
     expect(signTransactionMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        input: {
+        input: expect.objectContaining({
           derivationPath: INPUT.derivationPath,
           rawData: INPUT.rawData,
-        },
+        }),
       }),
     );
     expect(signGcsTransactionMock).not.toHaveBeenCalled();
@@ -137,6 +137,39 @@ describe("SignTransactionDeviceAction", () => {
       }),
     );
     expect(signTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it("uses the legacy signing task when only TRC10 contexts are provided", async () => {
+    const contexts = [
+      {
+        type: TronClearSignContextType.TRC10_TOKEN,
+        payload: "0a04555344541000",
+      },
+    ];
+    buildContextsMock.mockResolvedValueOnce(contexts);
+    const deviceAction = makeDeviceAction({
+      clearSigningMode: "auto",
+      contexts,
+    });
+
+    const finalState = await lastValueFrom(
+      deviceAction._execute({} as InternalApi).observable,
+    );
+
+    expect(finalState).toEqual({
+      status: DeviceActionStatus.Completed,
+      output: SIGNATURE,
+    });
+    expect(signTransactionMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          derivationPath: INPUT.derivationPath,
+          rawData: INPUT.rawData,
+          contexts,
+        }),
+      }),
+    );
+    expect(signGcsTransactionMock).not.toHaveBeenCalled();
   });
 
   it("keeps blind signing when explicitly requested, even with contexts", async () => {

@@ -35,6 +35,12 @@ export class ProvideContextTask {
     const { type, payload } = this.args.context;
 
     switch (type) {
+      case TronClearSignContextType.TRC10_TOKEN:
+        return CommandResultFactory({
+          error: new InvalidStatusWordError(
+            "TRC10 token context must be provided through the legacy sign transaction flow",
+          ),
+        });
       case TronClearSignContextType.TRC20_TOKEN:
         return this.api.sendCommand(
           new ProvideTrc20TokenInformationCommand({ payload }),

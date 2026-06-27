@@ -40,6 +40,23 @@ const DEFAULT_DERIVATION_PATH = "44'/195'/0'/0/0";
 const SAMPLE_RAW_DATA =
   "0a023dce220895da42177db0050740d8e0a5feed2d522c43727970746f436861696e2d54726f6e5352204c6564676572205472616e73616374696f6e732054657374735a68080112640a2d747970652e676f6f676c65617069732e636f6d2f70726f746f636f6c2e5472616e73666572436f6e747261637412330a1541c8599111f29c1e1e061265b4af93ea1f274ad78a121541c8599111f29c1e1e061265b4af93ea1f274ad78a1880c2d72f709d94a2feed2d";
 
+// TransferAssetContract raw_data for TRC10 USDT (token id 1000259).
+const SAMPLE_TRC10_USDT_RAW_DATA =
+  "0a023dce220895da42177db0050740d8e0a5feed2d5a75080212710a32747970652e676f6f676c65617069732e636f6d2f70726f746f636f6c2e5472616e736665724173736574436f6e7472616374123b0a0731303030323539121541c8599111f29c1e1e061265b4af93ea1f274ad78a1a1541c8599111f29c1e1e061265b4af93ea1f274ad78a20c0843d709d94a2feed2d";
+
+const SAMPLE_TRC10_USDT_CONTEXTS_JSON = JSON.stringify(
+  [
+    {
+      type: TronClearSignContextType.TRC10_TOKEN,
+      payload:
+        "0a045553445410001a46304402205170f03cc9c5987f873c74df9e3dd79ce3639071eb227377172d7b4960c82b0a022002e76314c9aa88d654e8918f9e5dafa53672d1f1370be04dcf90164879398eee",
+      tokenIndex: 0,
+    },
+  ],
+  null,
+  2,
+);
+
 // Arbitrary 32-byte hashes for the "sign by hash" smoke tests.
 const SAMPLE_HASH = `0x${"11".repeat(32)}`;
 const SAMPLE_DOMAIN_HASH = `0x${"22".repeat(32)}`;
@@ -112,10 +129,29 @@ function parseContextsJson(contextsJson: string): TronClearSignContext[] {
       throw new Error(`Invalid context at index ${index}`);
     }
 
-    return {
+    const parsedContext: TronClearSignContext = {
       type: record.type as TronClearSignContextType,
       payload: record.payload,
     };
+
+    if (
+      record.type === TronClearSignContextType.TRC10_TOKEN &&
+      record.tokenIndex !== undefined
+    ) {
+      if (
+        typeof record.tokenIndex !== "number" ||
+        !Number.isInteger(record.tokenIndex)
+      ) {
+        throw new Error(`Invalid TRC10 tokenIndex at index ${index}`);
+      }
+
+      return {
+        ...parsedContext,
+        tokenIndex: record.tokenIndex,
+      };
+    }
+
+    return parsedContext;
   });
 }
 
@@ -230,6 +266,68 @@ export const SignerTronView: React.FC<{ sessionId: string }> = ({
         },
         labelSelector: {
           contextsJson: "contexts JSON",
+        },
+        deviceModelId,
+      } satisfies DeviceActionProps<
+        SignTransactionDAOutput,
+        {
+          derivationPath: string;
+          rawData: string;
+          clearSigningMode: string;
+          contextsJson: string;
+          skipOpenApp?: boolean;
+        },
+        SignTransactionDAError,
+        SignTransactionDAIntermediateValue
+      >,
+      {
+        title: "Sign TRC10 Transfer",
+        description:
+          "Sign a TRC10 USDT TransferAssetContract with CAL token-name context",
+        executeDeviceAction: ({
+          derivationPath,
+          rawData,
+          clearSigningMode,
+          contextsJson,
+          skipOpenApp,
+        }) => {
+          if (!signer) {
+            throw new Error("Signer not initialized");
+          }
+          const bytes = hexaStringToBuffer(rawData) ?? new Uint8Array();
+          const contexts = parseContextsJson(contextsJson);
+          return signer.signTransaction(derivationPath, bytes, {
+            skipOpenApp,
+            clearSigningMode: clearSigningMode as TronClearSigningMode,
+            contexts,
+          });
+        },
+        initialValues: {
+          derivationPath: DEFAULT_DERIVATION_PATH,
+          rawData: SAMPLE_TRC10_USDT_RAW_DATA,
+          clearSigningMode: "auto",
+          contextsJson: SAMPLE_TRC10_USDT_CONTEXTS_JSON,
+          skipOpenApp: false,
+        },
+        validateValues: ({ rawData, contextsJson }) => {
+          try {
+            if (!hexaStringToBuffer(rawData)) {
+              return false;
+            }
+            const contexts = parseContextsJson(contextsJson);
+            return contexts.some(
+              (context) =>
+                context.type === TronClearSignContextType.TRC10_TOKEN,
+            );
+          } catch {
+            return false;
+          }
+        },
+        valueSelector: {
+          clearSigningMode: CLEAR_SIGNING_MODE_OPTIONS,
+        },
+        labelSelector: {
+          contextsJson: "TRC10 contexts JSON",
         },
         deviceModelId,
       } satisfies DeviceActionProps<
