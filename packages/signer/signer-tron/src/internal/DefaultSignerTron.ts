@@ -14,6 +14,7 @@ import { type SignTypedDataHashDAReturnType } from "@api/app-binder/SignTypedDat
 import { type AddressOptions } from "@api/model/AddressOptions";
 import { type MessageOptions } from "@api/model/MessageOptions";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
+import { type TronContextModule } from "@api/model/TronContextModule";
 import { type TypedData } from "@api/model/TypedData";
 import { type TypedDataOptions } from "@api/model/TypedDataOptions";
 import { type SignerTron } from "@api/SignerTron";
@@ -34,13 +35,18 @@ import { type GetAppConfigurationUseCase } from "@internal/use-cases/app-config/
 type DefaultSignerTronConstructorArgs = {
   dmk: DeviceManagementKit;
   sessionId: DeviceSessionId;
+  contextModule?: TronContextModule;
 };
 
 export class DefaultSignerTron implements SignerTron {
   private readonly _container: Container;
 
-  constructor({ dmk, sessionId }: DefaultSignerTronConstructorArgs) {
-    this._container = makeContainer({ dmk, sessionId });
+  constructor({
+    dmk,
+    sessionId,
+    contextModule,
+  }: DefaultSignerTronConstructorArgs) {
+    this._container = makeContainer({ dmk, sessionId, contextModule });
   }
 
   getAddress(

@@ -14,14 +14,16 @@ import { type SignTransactionDAReturnType } from "@api/app-binder/SignTransactio
 import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
 import { type SignTypedDataDAReturnType } from "@api/app-binder/SignTypedDataDeviceActionTypes";
 import { type SignTypedDataHashDAReturnType } from "@api/app-binder/SignTypedDataHashDeviceActionTypes";
+import { type TransactionOptions } from "@api/model/TransactionOptions";
+import { type TronContextModule } from "@api/model/TronContextModule";
 import { type TypedData } from "@api/model/TypedData";
 import { GetAddressCommand } from "@internal/app-binder/command/GetAddressCommand";
 import { GetAppConfigurationCommand } from "@internal/app-binder/command/GetAppConfigurationCommand";
 import { SignTIP712HashCommand } from "@internal/app-binder/command/SignTIP712HashCommand";
 import { SignTransactionHashCommand } from "@internal/app-binder/command/SignTransactionHashCommand";
 import { APP_NAME } from "@internal/app-binder/constants";
+import { SignTransactionDeviceAction } from "@internal/app-binder/device-action/SignTransaction/SignTransactionDeviceAction";
 import { SendSignPersonalMessageTask } from "@internal/app-binder/task/SendSignPersonalMessageTask";
-import { SendSignTransactionTask } from "@internal/app-binder/task/SendSignTransactionTask";
 import { SignTypedDataTask } from "@internal/app-binder/task/SignTypedDataTask";
 import { externalTypes } from "@internal/externalTypes";
 import { type TypedDataParserService } from "@internal/typed-data/service/TypedDataParserService";
@@ -31,6 +33,8 @@ export class TronAppBinder {
   constructor(
     @inject(externalTypes.Dmk) private dmk: DeviceManagementKit,
     @inject(externalTypes.SessionId) private sessionId: DeviceSessionId,
+    @inject(externalTypes.ContextModule)
+    private contextModule: TronContextModule,
   ) {}
 
   getAddress(args: {
@@ -77,20 +81,16 @@ export class TronAppBinder {
   signTransaction(args: {
     derivationPath: string;
     rawData: Uint8Array;
-    skipOpenApp: boolean;
+    options: TransactionOptions;
   }): SignTransactionDAReturnType {
     return this.dmk.executeDeviceAction({
       sessionId: this.sessionId,
-      deviceAction: new CallTaskInAppDeviceAction({
+      deviceAction: new SignTransactionDeviceAction({
         input: {
-          task: async (internalApi) =>
-            new SendSignTransactionTask(internalApi, {
-              derivationPath: args.derivationPath,
-              rawData: args.rawData,
-            }).run(),
-          appName: APP_NAME,
-          requiredUserInteraction: UserInteractionRequired.SignTransaction,
-          skipOpenApp: args.skipOpenApp,
+          derivationPath: args.derivationPath,
+          rawData: args.rawData,
+          options: args.options,
+          contextModule: this.contextModule,
         },
       }),
     });

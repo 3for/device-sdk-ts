@@ -7,9 +7,26 @@ import {
 } from "@ledgerhq/device-management-kit";
 
 import { type Signature } from "@api/model/Signature";
+import { type TransactionOptions } from "@api/model/TransactionOptions";
+import { type TronClearSignContext } from "@api/model/TronClearSignContext";
+import { type TronContextModule } from "@api/model/TronContextModule";
 import { type TronErrorCodes } from "@internal/app-binder/command/utils/tronApplicationErrors";
 
+export enum SignTransactionDAStep {
+  OPEN_APP = "signer.tron.steps.openApp",
+  BUILD_CONTEXTS = "signer.tron.steps.buildContexts",
+  SIGN_TRANSACTION = "signer.tron.steps.signTransaction",
+  SIGN_GCS_TRANSACTION = "signer.tron.steps.signGcsTransaction",
+}
+
 export type SignTransactionDAOutput = Signature;
+
+export type SignTransactionDAInput = {
+  readonly derivationPath: string;
+  readonly rawData: Uint8Array;
+  readonly options: TransactionOptions;
+  readonly contextModule: TronContextModule;
+};
 
 export type SignTransactionDAError =
   | OpenAppDAError
@@ -20,7 +37,14 @@ type SignTransactionDARequiredInteraction =
   | UserInteractionRequired.SignTransaction;
 
 export type SignTransactionDAIntermediateValue = {
-  requiredUserInteraction: SignTransactionDARequiredInteraction;
+  readonly requiredUserInteraction: SignTransactionDARequiredInteraction;
+  readonly step: SignTransactionDAStep;
+};
+
+export type SignTransactionDAInternalState = {
+  readonly error: SignTransactionDAError | null;
+  readonly signature: Signature | null;
+  readonly contexts: TronClearSignContext[];
 };
 
 export type SignTransactionDAReturnType = ExecuteDeviceActionReturnType<

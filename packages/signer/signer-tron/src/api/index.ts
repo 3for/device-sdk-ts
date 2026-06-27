@@ -45,7 +45,18 @@ export { type AddressOptions } from "@api/model/AddressOptions";
 export { type AppConfiguration } from "@api/model/AppConfiguration";
 export { type MessageOptions } from "@api/model/MessageOptions";
 export { type Signature } from "@api/model/Signature";
-export { type TransactionOptions } from "@api/model/TransactionOptions";
+export {
+  type TransactionOptions,
+  type TronClearSigningMode,
+} from "@api/model/TransactionOptions";
+export {
+  type TronClearSignContext,
+  TronClearSignContextType,
+} from "@api/model/TronClearSignContext";
+export {
+  type TronContextModule,
+  type TronContextModuleInput,
+} from "@api/model/TronContextModule";
 export {
   type TypedData,
   type TypedDataDomain,

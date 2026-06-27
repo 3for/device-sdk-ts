@@ -1,3 +1,9 @@
+import { type TronClearSignContext } from "@api/model/TronClearSignContext";
+
+export type TronClearSigningMode = "auto" | "gcs" | "blind";
+
 export type TransactionOptions = {
-  skipOpenApp?: boolean;
+  readonly skipOpenApp?: boolean;
+  readonly clearSigningMode?: TronClearSigningMode;
+  readonly contexts?: TronClearSignContext[];
 };

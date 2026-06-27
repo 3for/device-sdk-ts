@@ -3,6 +3,8 @@ import {
   type DeviceSessionId,
 } from "@ledgerhq/device-management-kit";
 
+import { type TronContextModule } from "@api/model/TronContextModule";
+import { EmptyTronContextModule } from "@internal/context/EmptyTronContextModule";
 import { DefaultSignerTron } from "@internal/DefaultSignerTron";
 
 type SignerTronBuilderConstructorArgs = {
@@ -16,10 +18,22 @@ type SignerTronBuilderConstructorArgs = {
 export class SignerTronBuilder {
   private readonly _dmk: DeviceManagementKit;
   private readonly _sessionId: DeviceSessionId;
+  private _customContextModule: TronContextModule | undefined;
 
   constructor({ dmk, sessionId }: SignerTronBuilderConstructorArgs) {
     this._dmk = dmk;
     this._sessionId = sessionId;
+  }
+
+  /**
+   * Override the default context module.
+   *
+   * This is the development hook for fixture/mock clear-signing contexts until
+   * Tron contexts are available from the official context module.
+   */
+  withContextModule(contextModule: TronContextModule) {
+    this._customContextModule = contextModule;
+    return this;
   }
 
   /**
@@ -31,6 +45,7 @@ export class SignerTronBuilder {
     return new DefaultSignerTron({
       dmk: this._dmk,
       sessionId: this._sessionId,
+      contextModule: this._customContextModule ?? new EmptyTronContextModule(),
     });
   }
 }

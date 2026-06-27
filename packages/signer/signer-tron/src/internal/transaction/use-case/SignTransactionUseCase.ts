@@ -20,7 +20,11 @@ export class SignTransactionUseCase {
     return this.appBinder.signTransaction({
       derivationPath,
       rawData,
-      skipOpenApp: options?.skipOpenApp ?? false,
+      options: {
+        skipOpenApp: options?.skipOpenApp ?? false,
+        clearSigningMode: options?.clearSigningMode ?? "auto",
+        contexts: options?.contexts,
+      },
     });
   }
 }
