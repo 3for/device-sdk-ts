@@ -1,11 +1,13 @@
 import { type GetAddressDAReturnType } from "@api/app-binder/GetAddressDeviceActionTypes";
 import { type GetAppConfigurationDAReturnType } from "@api/app-binder/GetAppConfigurationDeviceActionTypes";
+import { type GetECDHPairKeyDAReturnType } from "@api/app-binder/GetECDHPairKeyDeviceActionTypes";
 import { type SignPersonalMessageDAReturnType } from "@api/app-binder/SignPersonalMessageDeviceActionTypes";
 import { type SignTransactionDAReturnType } from "@api/app-binder/SignTransactionDeviceActionTypes";
 import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
 import { type SignTypedDataDAReturnType } from "@api/app-binder/SignTypedDataDeviceActionTypes";
 import { type SignTypedDataHashDAReturnType } from "@api/app-binder/SignTypedDataHashDeviceActionTypes";
 import { type AddressOptions } from "@api/model/AddressOptions";
+import { type ECDHOptions } from "@api/model/ECDHOptions";
 import { type MessageOptions } from "@api/model/MessageOptions";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
 import { type TypedData } from "@api/model/TypedData";
@@ -18,6 +20,16 @@ export interface SignerTron {
   ) => GetAddressDAReturnType;
 
   getAppConfiguration: () => GetAppConfigurationDAReturnType;
+
+  /**
+   * Derive a Tron ECDH pair key with a remote uncompressed secp256k1 public key.
+   * The device displays and requires confirmation before returning the secret.
+   */
+  getECDHPairKey: (
+    derivationPath: string,
+    publicKey: string | Uint8Array,
+    options?: ECDHOptions,
+  ) => GetECDHPairKeyDAReturnType;
 
   /**
    * Sign a Tron transaction.

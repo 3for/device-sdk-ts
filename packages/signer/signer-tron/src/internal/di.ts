@@ -7,6 +7,7 @@ import { Container } from "inversify";
 import { type TronContextModule } from "@api/model/TronContextModule";
 import { appBindingModuleFactory } from "@internal/app-binder/di/appBinderModule";
 import { EmptyTronContextModule } from "@internal/context/EmptyTronContextModule";
+import { ecdhModuleFactory } from "@internal/ecdh/di/ecdhModule";
 import { externalTypes } from "@internal/externalTypes";
 import { messageModuleFactory } from "@internal/message/di/messageModule";
 import { transactionModuleFactory } from "@internal/transaction/di/transactionModule";
@@ -39,6 +40,7 @@ export const makeContainer = ({
     appBindingModuleFactory(),
     addressModuleFactory(),
     appConfigModuleFactory(),
+    ecdhModuleFactory(),
     transactionModuleFactory(),
     messageModuleFactory(),
     typedDataModuleFactory(),

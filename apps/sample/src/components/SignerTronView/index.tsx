@@ -7,6 +7,9 @@ import {
   type GetAppConfigurationDAError,
   type GetAppConfigurationDAIntermediateValue,
   type GetAppConfigurationDAOutput,
+  type GetECDHPairKeyDAError,
+  type GetECDHPairKeyDAIntermediateValue,
+  type GetECDHPairKeyDAOutput,
   type SignPersonalMessageDAError,
   type SignPersonalMessageDAIntermediateValue,
   type SignPersonalMessageDAOutput,
@@ -56,6 +59,9 @@ const SAMPLE_TRC10_USDT_CONTEXTS_JSON = JSON.stringify(
   null,
   2,
 );
+
+const SAMPLE_ECDH_PUBLIC_KEY =
+  "04ff21f8e64d3a3c0198edfbb7afdc79be959432e92e2f8a1984bb436a414b8edcec0345aad0c1bf7da04fd036dd7f9f617e30669224283d950fab9dd84831dc83";
 
 // Arbitrary 32-byte hashes for the "sign by hash" smoke tests.
 const SAMPLE_HASH = `0x${"11".repeat(32)}`;
@@ -220,6 +226,38 @@ export const SignerTronView: React.FC<{ sessionId: string }> = ({
         Record<string, never>,
         GetAppConfigurationDAError,
         GetAppConfigurationDAIntermediateValue
+      >,
+      {
+        title: "Get ECDH Pair Key",
+        description:
+          "Derive a Tron ECDH pair key with a remote uncompressed secp256k1 public key",
+        executeDeviceAction: ({ derivationPath, publicKey, skipOpenApp }) => {
+          if (!signer) {
+            throw new Error("Signer not initialized");
+          }
+          return signer.getECDHPairKey(derivationPath, publicKey, {
+            skipOpenApp,
+          });
+        },
+        initialValues: {
+          derivationPath: DEFAULT_DERIVATION_PATH,
+          publicKey: SAMPLE_ECDH_PUBLIC_KEY,
+          skipOpenApp: false,
+        },
+        validateValues: ({ publicKey }) => {
+          const bytes = hexaStringToBuffer(publicKey);
+          return bytes?.length === 65 && bytes[0] === 0x04;
+        },
+        deviceModelId,
+      } satisfies DeviceActionProps<
+        GetECDHPairKeyDAOutput,
+        {
+          derivationPath: string;
+          publicKey: string;
+          skipOpenApp?: boolean;
+        },
+        GetECDHPairKeyDAError,
+        GetECDHPairKeyDAIntermediateValue
       >,
       {
         title: "Sign Transaction",

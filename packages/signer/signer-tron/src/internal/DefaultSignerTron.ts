@@ -6,12 +6,14 @@ import { type Container } from "inversify";
 
 import { type GetAddressDAReturnType } from "@api/app-binder/GetAddressDeviceActionTypes";
 import { type GetAppConfigurationDAReturnType } from "@api/app-binder/GetAppConfigurationDeviceActionTypes";
+import { type GetECDHPairKeyDAReturnType } from "@api/app-binder/GetECDHPairKeyDeviceActionTypes";
 import { type SignPersonalMessageDAReturnType } from "@api/app-binder/SignPersonalMessageDeviceActionTypes";
 import { type SignTransactionDAReturnType } from "@api/app-binder/SignTransactionDeviceActionTypes";
 import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransactionHashDeviceActionTypes";
 import { type SignTypedDataDAReturnType } from "@api/app-binder/SignTypedDataDeviceActionTypes";
 import { type SignTypedDataHashDAReturnType } from "@api/app-binder/SignTypedDataHashDeviceActionTypes";
 import { type AddressOptions } from "@api/model/AddressOptions";
+import { type ECDHOptions } from "@api/model/ECDHOptions";
 import { type MessageOptions } from "@api/model/MessageOptions";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
 import { type TronContextModule } from "@api/model/TronContextModule";
@@ -19,6 +21,8 @@ import { type TypedData } from "@api/model/TypedData";
 import { type TypedDataOptions } from "@api/model/TypedDataOptions";
 import { type SignerTron } from "@api/SignerTron";
 import { makeContainer } from "@internal/di";
+import { ecdhTypes } from "@internal/ecdh/di/ecdhTypes";
+import { type GetECDHPairKeyUseCase } from "@internal/ecdh/use-case/GetECDHPairKeyUseCase";
 import { messageTypes } from "@internal/message/di/messageTypes";
 import { type SignMessageUseCase } from "@internal/message/use-case/SignMessageUseCase";
 import { transactionTypes } from "@internal/transaction/di/transactionTypes";
@@ -64,6 +68,16 @@ export class DefaultSignerTron implements SignerTron {
         appConfigTypes.GetAppConfigurationUseCase,
       )
       .execute();
+  }
+
+  getECDHPairKey(
+    derivationPath: string,
+    publicKey: string | Uint8Array,
+    options?: ECDHOptions,
+  ): GetECDHPairKeyDAReturnType {
+    return this._container
+      .get<GetECDHPairKeyUseCase>(ecdhTypes.GetECDHPairKeyUseCase)
+      .execute(derivationPath, publicKey, options);
   }
 
   signTransaction(

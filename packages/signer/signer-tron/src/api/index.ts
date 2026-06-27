@@ -11,6 +11,12 @@ export {
   type GetAppConfigurationDAReturnType,
 } from "@api/app-binder/GetAppConfigurationDeviceActionTypes";
 export {
+  type GetECDHPairKeyDAError,
+  type GetECDHPairKeyDAIntermediateValue,
+  type GetECDHPairKeyDAOutput,
+  type GetECDHPairKeyDAReturnType,
+} from "@api/app-binder/GetECDHPairKeyDeviceActionTypes";
+export {
   type SignPersonalMessageDAError,
   type SignPersonalMessageDAIntermediateValue,
   type SignPersonalMessageDAOutput,
@@ -43,6 +49,8 @@ export {
 export { type Address } from "@api/model/Address";
 export { type AddressOptions } from "@api/model/AddressOptions";
 export { type AppConfiguration } from "@api/model/AppConfiguration";
+export { type ECDHOptions } from "@api/model/ECDHOptions";
+export { type ECDHPairKey } from "@api/model/ECDHPairKey";
 export { type MessageOptions } from "@api/model/MessageOptions";
 export { type Signature } from "@api/model/Signature";
 export {
