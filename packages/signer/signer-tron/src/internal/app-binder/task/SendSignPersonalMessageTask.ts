@@ -11,6 +11,7 @@ import { type Maybe, Nothing } from "purify-ts";
 import { type Signature } from "@api/model/Signature";
 import { SignPersonalMessageCommand } from "@internal/app-binder/command/SignPersonalMessageCommand";
 import { type TronErrorCodes } from "@internal/app-binder/command/utils/tronApplicationErrors";
+import { P1 } from "@internal/app-binder/constants";
 import { encodeDerivationPath } from "@internal/shared/utils/encodeDerivationPath";
 
 const CHUNK_SIZE = 250;
@@ -60,7 +61,7 @@ export class SendSignPersonalMessageTask {
       const result = await this.api.sendCommand(
         new SignPersonalMessageCommand({
           chunk: chunks[i]!,
-          isFirstChunk: i === 0,
+          p1: chunks.length === 1 ? P1.SIGN : i === 0 ? P1.FIRST : P1.MORE,
           fullDisplay,
         }),
       );

@@ -13,7 +13,7 @@ import { CommandErrorHelper } from "@ledgerhq/signer-utils";
 import { Just, type Maybe, Nothing } from "purify-ts";
 
 import { type Signature } from "@api/model/Signature";
-import { INS, LEDGER_CLA, P1 } from "@internal/app-binder/constants";
+import { INS, LEDGER_CLA } from "@internal/app-binder/constants";
 
 import { parseSignature } from "./utils/parseSignature";
 import {
@@ -30,7 +30,8 @@ export type SignPersonalMessageCommandArgs = {
    * messageBytes`; continuation chunks carry the remaining message bytes.
    */
   readonly chunk: Uint8Array;
-  readonly isFirstChunk: boolean;
+  /** P1: SIGN (0x10) for a single chunk, FIRST (0x00) / MORE (0x80) otherwise. */
+  readonly p1: number;
   /** Use INS 0xC8 (full on-device display) instead of 0x08. */
   readonly fullDisplay: boolean;
 };
@@ -60,7 +61,7 @@ export class SignPersonalMessageCommand
       ins: this.args.fullDisplay
         ? INS.SIGN_PERSONAL_MESSAGE_FULL_DISPLAY
         : INS.SIGN_PERSONAL_MESSAGE,
-      p1: this.args.isFirstChunk ? P1.FIRST : P1.MORE,
+      p1: this.args.p1,
       p2: 0x00,
     };
     return new ApduBuilder(apduArgs).addBufferToData(this.args.chunk).build();
