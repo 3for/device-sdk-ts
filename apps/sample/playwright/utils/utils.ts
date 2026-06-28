@@ -82,6 +82,10 @@ export const getLastDeviceResponseContent = async (
 export const isValidEthereumAddress = (address: string): boolean =>
   /^0x[a-fA-F0-9]{40}$/.test(address);
 
+// Tron addresses are Base58Check, start with "T" and are 34 chars long.
+export const isValidTronAddress = (address: string): boolean =>
+  /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address);
+
 export const isValidPublicKey = (publicKey: string): boolean =>
   /^04[a-fA-F0-9]{128}$/.test(publicKey);
 
