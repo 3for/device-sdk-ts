@@ -25,8 +25,8 @@ import { SignTIP712HashCommand } from "@internal/app-binder/command/SignTIP712Ha
 import { SignTransactionHashCommand } from "@internal/app-binder/command/SignTransactionHashCommand";
 import { APP_NAME } from "@internal/app-binder/constants";
 import { SignTransactionDeviceAction } from "@internal/app-binder/device-action/SignTransaction/SignTransactionDeviceAction";
+import { SignTypedDataDeviceAction } from "@internal/app-binder/device-action/SignTypedData/SignTypedDataDeviceAction";
 import { SendSignPersonalMessageTask } from "@internal/app-binder/task/SendSignPersonalMessageTask";
-import { SignTypedDataTask } from "@internal/app-binder/task/SignTypedDataTask";
 import { externalTypes } from "@internal/externalTypes";
 import { type TypedDataParserService } from "@internal/typed-data/service/TypedDataParserService";
 
@@ -171,16 +171,11 @@ export class TronAppBinder {
   }): SignTypedDataDAReturnType {
     return this.dmk.executeDeviceAction({
       sessionId: this.sessionId,
-      deviceAction: new CallTaskInAppDeviceAction({
+      deviceAction: new SignTypedDataDeviceAction({
         input: {
-          task: async (internalApi) =>
-            new SignTypedDataTask(internalApi, {
-              derivationPath: args.derivationPath,
-              data: args.data,
-              parser: args.parser,
-            }).run(),
-          appName: APP_NAME,
-          requiredUserInteraction: UserInteractionRequired.SignTypedData,
+          derivationPath: args.derivationPath,
+          data: args.data,
+          parser: args.parser,
           skipOpenApp: args.skipOpenApp,
         },
       }),
