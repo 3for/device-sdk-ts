@@ -28,6 +28,7 @@ export const TYPES = {
   MainServiceController: Symbol.for("MainServiceController"),
   DMKServiceController: Symbol.for("DMKServiceController"),
   SolanaDMKServiceController: Symbol.for("SolanaDMKServiceController"),
+  TronDMKServiceController: Symbol.for("TronDMKServiceController"),
   SpeculosServiceController: Symbol.for("SpeculosServiceController"),
   ServiceControllers: Symbol.for("ServiceControllers"),
 
@@ -58,6 +59,10 @@ export const TYPES = {
   TestSolanaTransactionUseCase: Symbol.for("TestSolanaTransactionUseCase"),
   TestBatchSolanaTransactionFromFileUseCase: Symbol.for(
     "TestBatchSolanaTransactionFromFileUseCase",
+  ),
+  TestTronTransactionUseCase: Symbol.for("TestTronTransactionUseCase"),
+  TestBatchTronTransactionFromFileUseCase: Symbol.for(
+    "TestBatchTronTransactionFromFileUseCase",
   ),
 
   // Solana program-level testing (fetches transactions by program ID via RPC)

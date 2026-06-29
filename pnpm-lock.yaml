@@ -470,6 +470,9 @@ importers:
       '@ledgerhq/device-signer-kit-solana':
         specifier: workspace:^
         version: link:../../packages/signer/signer-solana
+      '@ledgerhq/device-signer-kit-tron':
+        specifier: workspace:^
+        version: link:../../packages/signer/signer-tron
       '@ledgerhq/device-transport-kit-speculos':
         specifier: workspace:^
         version: link:../../packages/transport/speculos

@@ -14,6 +14,7 @@
   "scripts": {
     "cli": "tsx src/cli/EthereumTransactionTesterCli.ts",
     "cli:solana": "tsx src/cli/SolanaTransactionTesterCli.ts",
+    "cli:tron": "tsx src/cli/TronTransactionTesterCli.ts",
     "build": "tsc",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
@@ -35,7 +36,8 @@
     "test:solana:program:all": "pnpm cli:solana program-all",
     "test:erc7730": "./scripts/test-erc7730-calldata.sh",
     "test:erc7730:typed-data": "./scripts/test-erc7730-typed-data.sh",
-    "test:gating": "./scripts/test-gating.sh"
+    "test:gating": "./scripts/test-gating.sh",
+    "test:tron:transfer": "pnpm cli:tron raw-file ./ressources/tron/sample-transfer.json"
   },
   "dependencies": {
     "@ledgerhq/cal-interceptor": "workspace:^",
@@ -43,6 +45,7 @@
     "@ledgerhq/device-management-kit": "workspace:^",
     "@ledgerhq/device-signer-kit-ethereum": "workspace:^",
     "@ledgerhq/device-signer-kit-solana": "workspace:^",
+    "@ledgerhq/device-signer-kit-tron": "workspace:^",
     "@ledgerhq/solana-tools": "workspace:^",
     "@ledgerhq/device-transport-kit-speculos": "workspace:^",
     "@ledgerhq/speculos-device-controller": "workspace:^",
