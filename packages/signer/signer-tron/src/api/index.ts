@@ -63,10 +63,6 @@ export {
   type TronTrc10TokenContext,
 } from "@api/model/TronClearSignContext";
 export {
-  type TronContextModule,
-  type TronContextModuleInput,
-} from "@api/model/TronContextModule";
-export {
   type TypedData,
   type TypedDataDomain,
   type TypedDataField,

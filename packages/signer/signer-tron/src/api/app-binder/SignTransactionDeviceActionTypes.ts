@@ -1,3 +1,4 @@
+import { type ContextModule } from "@ledgerhq/context-module";
 import {
   type CommandErrorResult,
   type ExecuteDeviceActionReturnType,
@@ -9,7 +10,6 @@ import {
 import { type Signature } from "@api/model/Signature";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
 import { type TronClearSignContext } from "@api/model/TronClearSignContext";
-import { type TronContextModule } from "@api/model/TronContextModule";
 import { type TronErrorCodes } from "@internal/app-binder/command/utils/tronApplicationErrors";
 
 export enum SignTransactionDAStep {
@@ -25,7 +25,7 @@ export type SignTransactionDAInput = {
   readonly derivationPath: string;
   readonly rawData: Uint8Array;
   readonly options: TransactionOptions;
-  readonly contextModule: TronContextModule;
+  readonly contextModule: ContextModule;
 };
 
 export type SignTransactionDAError =

@@ -1,12 +1,11 @@
+import { type ContextModule } from "@ledgerhq/context-module";
 import {
   type DeviceManagementKit,
   type DeviceSessionId,
 } from "@ledgerhq/device-management-kit";
 import { Container } from "inversify";
 
-import { type TronContextModule } from "@api/model/TronContextModule";
 import { appBindingModuleFactory } from "@internal/app-binder/di/appBinderModule";
-import { EmptyTronContextModule } from "@internal/context/EmptyTronContextModule";
 import { ecdhModuleFactory } from "@internal/ecdh/di/ecdhModule";
 import { externalTypes } from "@internal/externalTypes";
 import { messageModuleFactory } from "@internal/message/di/messageModule";
@@ -18,7 +17,7 @@ import { appConfigModuleFactory } from "@internal/use-cases/app-config/di/appCon
 type MakeContainerProps = {
   dmk: DeviceManagementKit;
   sessionId: DeviceSessionId;
-  contextModule?: TronContextModule;
+  contextModule: ContextModule;
 };
 
 export const makeContainer = ({
@@ -33,8 +32,8 @@ export const makeContainer = ({
     .bind<DeviceSessionId>(externalTypes.SessionId)
     .toConstantValue(sessionId);
   container
-    .bind<TronContextModule>(externalTypes.ContextModule)
-    .toConstantValue(contextModule ?? new EmptyTronContextModule());
+    .bind<ContextModule>(externalTypes.ContextModule)
+    .toConstantValue(contextModule);
 
   container.loadSync(
     appBindingModuleFactory(),

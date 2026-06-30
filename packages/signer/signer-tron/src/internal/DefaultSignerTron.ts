@@ -1,3 +1,4 @@
+import { type ContextModule } from "@ledgerhq/context-module";
 import {
   type DeviceManagementKit,
   type DeviceSessionId,
@@ -16,7 +17,6 @@ import { type AddressOptions } from "@api/model/AddressOptions";
 import { type ECDHOptions } from "@api/model/ECDHOptions";
 import { type MessageOptions } from "@api/model/MessageOptions";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
-import { type TronContextModule } from "@api/model/TronContextModule";
 import { type TypedData } from "@api/model/TypedData";
 import { type TypedDataOptions } from "@api/model/TypedDataOptions";
 import { type SignerTron } from "@api/SignerTron";
@@ -39,7 +39,7 @@ import { type GetAppConfigurationUseCase } from "@internal/use-cases/app-config/
 type DefaultSignerTronConstructorArgs = {
   dmk: DeviceManagementKit;
   sessionId: DeviceSessionId;
-  contextModule?: TronContextModule;
+  contextModule: ContextModule;
 };
 
 export class DefaultSignerTron implements SignerTron {

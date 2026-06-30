@@ -344,7 +344,6 @@ export class SignTransactionDeviceAction extends XStateDeviceAction<
       buildContexts: ({ input }) =>
         new BuildTronContextsTask({
           contextModule: input.contextModule,
-          derivationPath: input.derivationPath,
           rawData: input.rawData,
           options: input.options,
         }).run(),

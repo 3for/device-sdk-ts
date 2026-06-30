@@ -1,3 +1,4 @@
+import { type ContextModule } from "@ledgerhq/context-module";
 import {
   CallTaskInAppDeviceAction,
   type DeviceManagementKit,
@@ -16,7 +17,6 @@ import { type SignTransactionHashDAReturnType } from "@api/app-binder/SignTransa
 import { type SignTypedDataDAReturnType } from "@api/app-binder/SignTypedDataDeviceActionTypes";
 import { type SignTypedDataHashDAReturnType } from "@api/app-binder/SignTypedDataHashDeviceActionTypes";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
-import { type TronContextModule } from "@api/model/TronContextModule";
 import { type TypedData } from "@api/model/TypedData";
 import { GetAddressCommand } from "@internal/app-binder/command/GetAddressCommand";
 import { GetAppConfigurationCommand } from "@internal/app-binder/command/GetAppConfigurationCommand";
@@ -36,7 +36,7 @@ export class TronAppBinder {
     @inject(externalTypes.Dmk) private dmk: DeviceManagementKit,
     @inject(externalTypes.SessionId) private sessionId: DeviceSessionId,
     @inject(externalTypes.ContextModule)
-    private contextModule: TronContextModule,
+    private contextModule: ContextModule,
   ) {}
 
   getAddress(args: {

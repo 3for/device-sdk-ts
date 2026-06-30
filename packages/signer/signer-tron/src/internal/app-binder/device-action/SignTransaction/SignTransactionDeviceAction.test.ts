@@ -209,6 +209,9 @@ describe("SignTransactionDeviceAction", () => {
         },
         contextModule: {
           getContexts: vi.fn(),
+          getFieldContext: vi.fn(),
+          getTypedDataFilters: vi.fn(),
+          report: vi.fn(),
         },
       },
     });

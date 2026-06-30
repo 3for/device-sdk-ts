@@ -32,6 +32,8 @@ import { tokenModuleFactory as solanaTokenModuleFactory } from "@/modules/solana
 import { tokenAccountStateModuleFactory } from "@/modules/solana/token-account-state/di/tokenAccountStateModuleFactory";
 import { tokenInfoModuleFactory } from "@/modules/solana/token-info/di/tokenInfoModuleFactory";
 import { solanaTrustedNameModuleFactory } from "@/modules/solana/trusted-name/di/trustedNameModuleFactory";
+import { tronCalldataModuleFactory } from "@/modules/tron/calldata/di/tronCalldataModuleFactory";
+import { trc10TokenModuleFactory } from "@/modules/tron/trc10/di/trc10TokenModuleFactory";
 import { ContextModuleChainID } from "@/shared/domain/ContextModuleChainID";
 import { networkModuleFactory } from "@/shared/network/di/networkModuleFactory";
 
@@ -91,6 +93,12 @@ export const makeContainer = ({ config }: MakeContainerArgs) => {
       container.loadSync(
         nanoPkiModuleFactory(),
         accountOwnershipModuleFactory(),
+      );
+      break;
+    case ContextModuleChainID.Tron:
+      container.loadSync(
+        trc10TokenModuleFactory(),
+        tronCalldataModuleFactory(),
       );
       break;
     default: {

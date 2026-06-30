@@ -55,6 +55,16 @@ describe("ContextModuleBuilder", () => {
     expect(res).toBeInstanceOf(DefaultContextModule);
   });
 
+  it("should return a default Tron context module", () => {
+    const contextModuleBuilder = new ContextModuleBuilder(defaultBuilderArgs);
+
+    const res = contextModuleBuilder
+      .setChain(ContextModuleChainID.Tron)
+      .build();
+
+    expect(res).toBeInstanceOf(DefaultContextModule);
+  });
+
   it("should return a custom context module", () => {
     const contextModuleBuilder = new ContextModuleBuilder(defaultBuilderArgs);
     const customLoader: ContextLoader = {

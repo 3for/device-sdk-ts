@@ -1,10 +1,13 @@
 import {
+  type ContextModule,
+  ContextModuleBuilder,
+  ContextModuleChainID,
+} from "@ledgerhq/context-module";
+import {
   type DeviceManagementKit,
   type DeviceSessionId,
 } from "@ledgerhq/device-management-kit";
 
-import { type TronContextModule } from "@api/model/TronContextModule";
-import { DefaultTronContextModule } from "@internal/context/DefaultTronContextModule";
 import { DefaultSignerTron } from "@internal/DefaultSignerTron";
 
 type SignerTronBuilderConstructorArgs = {
@@ -20,7 +23,7 @@ export class SignerTronBuilder {
   private readonly _dmk: DeviceManagementKit;
   private readonly _sessionId: DeviceSessionId;
   private readonly _originToken: string | undefined;
-  private _customContextModule: TronContextModule | undefined;
+  private _customContextModule: ContextModule | undefined;
 
   constructor({
     dmk,
@@ -38,7 +41,7 @@ export class SignerTronBuilder {
    * This is the development hook for fixture/mock clear-signing contexts until
    * Tron contexts are available from the official context module.
    */
-  withContextModule(contextModule: TronContextModule) {
+  withContextModule(contextModule: ContextModule) {
     this._customContextModule = contextModule;
     return this;
   }
@@ -49,14 +52,20 @@ export class SignerTronBuilder {
    * @returns the signer instance
    */
   public build() {
+    const contextModule =
+      this._customContextModule ??
+      new ContextModuleBuilder({
+        originToken: this._originToken,
+        loggerFactory: (tag: string) =>
+          this._dmk.getLoggerFactory()(["ContextModule", tag]),
+      })
+        .setChain(ContextModuleChainID.Tron)
+        .build();
+
     return new DefaultSignerTron({
       dmk: this._dmk,
       sessionId: this._sessionId,
-      contextModule:
-        this._customContextModule ??
-        new DefaultTronContextModule({
-          originToken: this._originToken,
-        }),
+      contextModule,
     });
   }
 }
