@@ -61,6 +61,8 @@ const CLEAR_SIGNING_MODE_OPTIONS = [
   { label: "blind", value: "blind" },
 ];
 
+type TronClearSignContextTypeValue = TronClearSignContext["type"];
+
 // Canonical EIP-712 "Mail" example (TIP-712 reuses the same structure).
 const SAMPLE_TYPED_DATA = JSON.stringify(
   {
@@ -123,7 +125,7 @@ function parseContextsJson(contextsJson: string): TronClearSignContext[] {
     }
 
     const parsedContext: TronClearSignContext = {
-      type: record.type as TronClearSignContextType,
+      type: record.type as TronClearSignContextTypeValue,
       payload: record.payload,
     };
 
