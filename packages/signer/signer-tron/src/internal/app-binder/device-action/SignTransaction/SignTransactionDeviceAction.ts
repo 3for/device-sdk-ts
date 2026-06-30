@@ -1,4 +1,9 @@
 import {
+  type TronClearSignContext,
+  TronClearSignContextType,
+  type TronTrc10TokenContext,
+} from "@ledgerhq/context-module";
+import {
   type CommandResult,
   type DeviceActionStateMachine,
   type InternalApi,
@@ -21,11 +26,6 @@ import {
   SignTransactionDAStep,
 } from "@api/app-binder/SignTransactionDeviceActionTypes";
 import { type Signature } from "@api/model/Signature";
-import {
-  type TronClearSignContext,
-  TronClearSignContextType,
-  type TronTrc10TokenContext,
-} from "@api/model/TronClearSignContext";
 import { type TronErrorCodes } from "@internal/app-binder/command/utils/tronApplicationErrors";
 import { APP_NAME } from "@internal/app-binder/constants";
 import { BuildTronContextsTask } from "@internal/app-binder/task/BuildTronContextsTask";

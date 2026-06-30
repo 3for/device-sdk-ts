@@ -1,3 +1,4 @@
+import { TronClearSignContextType } from "@ledgerhq/context-module";
 import {
   CommandResultFactory,
   type InternalApi,
@@ -6,7 +7,6 @@ import {
 import { Just, Nothing } from "purify-ts";
 
 import { type Signature } from "@api/model/Signature";
-import { TronClearSignContextType } from "@api/model/TronClearSignContext";
 
 import { SendSignTransactionTask } from "./SendSignTransactionTask";
 

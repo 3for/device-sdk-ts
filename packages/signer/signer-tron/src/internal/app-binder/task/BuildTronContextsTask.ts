@@ -1,17 +1,12 @@
 import {
   type ContextModule,
   isTronClearSignContextSuccess,
-  type TronClearSignContextSuccess,
-  TronClearSignContextType as ContextModuleTronClearSignContextType,
+  type TronClearSignContext,
   type TronContractType as ContextModuleTronContractType,
   type TronTransactionContext,
 } from "@ledgerhq/context-module";
 
 import { type TransactionOptions } from "@api/model/TransactionOptions";
-import {
-  type TronClearSignContext,
-  TronClearSignContextType,
-} from "@api/model/TronClearSignContext";
 import {
   type TransactionSubset,
   type TronContractType,
@@ -44,53 +39,6 @@ function toContextModuleContractType(
   return type as number as ContextModuleTronContractType;
 }
 
-function toSignerTronContext(
-  context: TronClearSignContextSuccess,
-): TronClearSignContext {
-  switch (context.type) {
-    case ContextModuleTronClearSignContextType.TRC10_TOKEN:
-      return {
-        type: TronClearSignContextType.TRC10_TOKEN,
-        payload: context.payload,
-        tokenIndex: context.tokenIndex,
-      };
-    case ContextModuleTronClearSignContextType.TRC20_TOKEN:
-      return {
-        type: TronClearSignContextType.TRC20_TOKEN,
-        payload: context.payload,
-      };
-    case ContextModuleTronClearSignContextType.NFT:
-      return { type: TronClearSignContextType.NFT, payload: context.payload };
-    case ContextModuleTronClearSignContextType.TRUSTED_NAME:
-      return {
-        type: TronClearSignContextType.TRUSTED_NAME,
-        payload: context.payload,
-      };
-    case ContextModuleTronClearSignContextType.ENUM:
-      return { type: TronClearSignContextType.ENUM, payload: context.payload };
-    case ContextModuleTronClearSignContextType.TRANSACTION_INFO:
-      return {
-        type: TronClearSignContextType.TRANSACTION_INFO,
-        payload: context.payload,
-      };
-    case ContextModuleTronClearSignContextType.TRANSACTION_FIELD_DESCRIPTION:
-      return {
-        type: TronClearSignContextType.TRANSACTION_FIELD_DESCRIPTION,
-        payload: context.payload,
-      };
-    case ContextModuleTronClearSignContextType.PROXY_INFO:
-      return {
-        type: TronClearSignContextType.PROXY_INFO,
-        payload: context.payload,
-      };
-    case ContextModuleTronClearSignContextType.GATED_SIGNING:
-      return {
-        type: TronClearSignContextType.GATED_SIGNING,
-        payload: context.payload,
-      };
-  }
-}
-
 export class BuildTronContextsTask {
   private readonly transactionMapper: TronTransactionMapperService;
 
@@ -114,9 +62,7 @@ export class BuildTronContextsTask {
         toContextModuleTransaction(transaction),
       );
 
-      return contexts
-        .filter(isTronClearSignContextSuccess)
-        .map(toSignerTronContext);
+      return contexts.filter(isTronClearSignContextSuccess);
     } catch {
       return [];
     }

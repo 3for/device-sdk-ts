@@ -1,12 +1,10 @@
 import {
   ClearSignContextType,
   type ContextModule,
-} from "@ledgerhq/context-module";
-
-import {
   type TronClearSignContext,
   TronClearSignContextType,
-} from "@api/model/TronClearSignContext";
+} from "@ledgerhq/context-module";
+
 import { type TransactionSubset } from "@internal/transaction/model/TransactionSubset";
 import { type TronTransactionMapperService } from "@internal/transaction/service/TronTransactionMapperService";
 

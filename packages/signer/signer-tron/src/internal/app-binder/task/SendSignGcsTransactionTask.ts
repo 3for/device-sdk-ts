@@ -1,3 +1,4 @@
+import { type TronClearSignContext } from "@ledgerhq/context-module";
 import {
   APDU_MAX_PAYLOAD,
   ByteArrayBuilder,
@@ -12,7 +13,6 @@ import { StartGcsFlowCommand } from "@internal/app-binder/command/StartGcsFlowCo
 import { StoreGcsTransactionCommand } from "@internal/app-binder/command/StoreGcsTransactionCommand";
 import { type TronErrorCodes } from "@internal/app-binder/command/utils/tronApplicationErrors";
 import { P1 } from "@internal/app-binder/constants";
-import { type TronClearSignContext } from "@internal/app-binder/model/TronClearSignContext";
 import { encodeDerivationPath } from "@internal/shared/utils/encodeDerivationPath";
 
 import { ProvideContextTask } from "./ProvideContextTask";

@@ -1,4 +1,8 @@
 import {
+  type TronClearSignContext,
+  TronClearSignContextType,
+} from "@ledgerhq/context-module";
+import {
   type CommandResult,
   CommandResultFactory,
   type InternalApi,
@@ -14,10 +18,6 @@ import { ProvideTransactionInformationCommand } from "@internal/app-binder/comma
 import { ProvideTrc20TokenInformationCommand } from "@internal/app-binder/command/ProvideTrc20TokenInformationCommand";
 import { ProvideTrustedNameCommand } from "@internal/app-binder/command/ProvideTrustedNameCommand";
 import { type TronErrorCodes } from "@internal/app-binder/command/utils/tronApplicationErrors";
-import {
-  type TronClearSignContext,
-  TronClearSignContextType,
-} from "@internal/app-binder/model/TronClearSignContext";
 
 import { SendPayloadInChunksTask } from "./SendPayloadInChunksTask";
 

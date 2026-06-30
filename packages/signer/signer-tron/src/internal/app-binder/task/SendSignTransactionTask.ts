@@ -1,4 +1,8 @@
 import {
+  TronClearSignContextType,
+  type TronTrc10TokenContext,
+} from "@ledgerhq/context-module";
+import {
   type CommandResult,
   CommandResultFactory,
   type InternalApi,
@@ -8,10 +12,6 @@ import {
 import { type Maybe, Nothing } from "purify-ts";
 
 import { type Signature } from "@api/model/Signature";
-import {
-  TronClearSignContextType,
-  type TronTrc10TokenContext,
-} from "@api/model/TronClearSignContext";
 import { ProvideTrc10TokenNameCommand } from "@internal/app-binder/command/ProvideTrc10TokenNameCommand";
 import { SignTransactionCommand } from "@internal/app-binder/command/SignTransactionCommand";
 import { type TronErrorCodes } from "@internal/app-binder/command/utils/tronApplicationErrors";

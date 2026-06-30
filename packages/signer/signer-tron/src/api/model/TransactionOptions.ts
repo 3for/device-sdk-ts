@@ -1,4 +1,4 @@
-import { type TronClearSignContext } from "@api/model/TronClearSignContext";
+import { type TronClearSignContext } from "@ledgerhq/context-module";
 
 export type TronClearSigningMode = "auto" | "gcs" | "blind";
 

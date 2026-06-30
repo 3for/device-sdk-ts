@@ -1,3 +1,4 @@
+import { TronClearSignContextType } from "@ledgerhq/context-module";
 import {
   type Command,
   CommandResultFactory,
@@ -9,7 +10,6 @@ import {
 import { ProvideNFTInformationCommand } from "@internal/app-binder/command/ProvideNFTInformationCommand";
 import { ProvideTransactionInformationCommand } from "@internal/app-binder/command/ProvideTransactionInformationCommand";
 import { ProvideTrc20TokenInformationCommand } from "@internal/app-binder/command/ProvideTrc20TokenInformationCommand";
-import { TronClearSignContextType } from "@internal/app-binder/model/TronClearSignContext";
 
 import { ProvideContextTask } from "./ProvideContextTask";
 

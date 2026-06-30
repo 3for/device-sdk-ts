@@ -58,11 +58,6 @@ export {
   type TronClearSigningMode,
 } from "@api/model/TransactionOptions";
 export {
-  type TronClearSignContext,
-  TronClearSignContextType,
-  type TronTrc10TokenContext,
-} from "@api/model/TronClearSignContext";
-export {
   type TypedData,
   type TypedDataDomain,
   type TypedDataField,
@@ -70,3 +65,8 @@ export {
 export { type TypedDataOptions } from "@api/model/TypedDataOptions";
 export { type SignerTron } from "@api/SignerTron";
 export { SignerTronBuilder } from "@api/SignerTronBuilder";
+export {
+  type TronClearSignContext,
+  TronClearSignContextType,
+  type TronTrc10TokenContext,
+} from "@ledgerhq/context-module";

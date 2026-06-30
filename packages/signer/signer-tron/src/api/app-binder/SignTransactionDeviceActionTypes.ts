@@ -1,4 +1,5 @@
 import { type ContextModule } from "@ledgerhq/context-module";
+import { type TronClearSignContext } from "@ledgerhq/context-module";
 import {
   type CommandErrorResult,
   type ExecuteDeviceActionReturnType,
@@ -9,7 +10,6 @@ import {
 
 import { type Signature } from "@api/model/Signature";
 import { type TransactionOptions } from "@api/model/TransactionOptions";
-import { type TronClearSignContext } from "@api/model/TronClearSignContext";
 import { type TronErrorCodes } from "@internal/app-binder/command/utils/tronApplicationErrors";
 
 export enum SignTransactionDAStep {

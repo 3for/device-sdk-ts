@@ -1,3 +1,4 @@
+import { TronClearSignContextType } from "@ledgerhq/context-module";
 import {
   CommandResultFactory,
   DeviceActionStatus,
@@ -6,7 +7,6 @@ import {
 import { lastValueFrom } from "rxjs";
 
 import { type Signature } from "@api/model/Signature";
-import { TronClearSignContextType } from "@api/model/TronClearSignContext";
 
 import { SignTransactionDeviceAction } from "./SignTransactionDeviceAction";
 

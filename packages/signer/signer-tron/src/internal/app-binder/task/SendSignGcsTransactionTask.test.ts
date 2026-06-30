@@ -1,4 +1,8 @@
 import {
+  type TronClearSignContext,
+  TronClearSignContextType,
+} from "@ledgerhq/context-module";
+import {
   type Command,
   CommandResultFactory,
   type InternalApi,
@@ -9,10 +13,6 @@ import {
 import { StartGcsFlowCommand } from "@internal/app-binder/command/StartGcsFlowCommand";
 import { StoreGcsTransactionCommand } from "@internal/app-binder/command/StoreGcsTransactionCommand";
 import { P1 } from "@internal/app-binder/constants";
-import {
-  type TronClearSignContext,
-  TronClearSignContextType,
-} from "@internal/app-binder/model/TronClearSignContext";
 
 import { SendSignGcsTransactionTask } from "./SendSignGcsTransactionTask";
 

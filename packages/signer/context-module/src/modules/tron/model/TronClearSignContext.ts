@@ -5,6 +5,10 @@ import {
   ClearSignContextType,
 } from "@/shared/model/ClearSignContext";
 
+/**
+ * Tron-specific payload overrides — contributed to the shared
+ * ClearSignContextSuccessPayloads map at the integration boundary.
+ */
 export type TronPayloadOverrides = {
   [ClearSignContextType.TRON_TRC10_TOKEN]: ClearSignContextSuccessBase & {
     tokenIndex?: number;
@@ -29,6 +33,14 @@ export type TronClearSignContextSuccessType =
 
 export type TronClearSignContextSuccess =
   ClearSignContextSuccess<TronClearSignContextSuccessType>;
+
+export type TronTrc10TokenContext =
+  ClearSignContextSuccess<ClearSignContextType.TRON_TRC10_TOKEN>;
+
+/**
+ * Public Tron context union consumed by signer-tron.
+ */
+export type TronClearSignContext = TronClearSignContextSuccess;
 
 export const TRON_CLEAR_SIGN_CONTEXT_SUCCESS_TYPES =
   new Set<ClearSignContextType>(Object.values(TronClearSignContextType));
