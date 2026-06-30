@@ -108,4 +108,124 @@ describe("HttpTronCalldataDescriptorDataSource", () => {
 
     expect(result.isLeft()).toBe(true);
   });
+
+  it("uses test signatures when CAL mode is test", async () => {
+    const httpMock = {
+      get: vi.fn().mockResolvedValue([
+        {
+          descriptors_calldata: {
+            TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t: {
+              a9059cbb: {
+                type: "calldata",
+                version: "v1",
+                transaction_info: {
+                  descriptor: {
+                    data: "0102",
+                    signatures: { prod: "bb", test: "cc" },
+                  },
+                },
+                enums: {},
+                fields: [],
+              },
+            },
+          },
+        },
+      ]),
+    };
+    const config = {
+      cal: {
+        url: "https://crypto-assets-service.api.ledger.com/v1",
+        mode: "test",
+        branch: "main",
+      },
+    } as ContextModuleServiceConfig;
+    const dataSource = new HttpTronCalldataDescriptorDataSource(
+      config,
+      httpMock as unknown as DmkNetworkClient,
+    );
+
+    const result = await dataSource.getCalldataDescriptors({
+      contractAddress: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+      selector: "a9059cbb",
+    });
+
+    expect(result.extract()).toStrictEqual([
+      {
+        type: ClearSignContextType.TRON_TRANSACTION_INFO,
+        payload: "010281ff01cc",
+      },
+    ]);
+  });
+
+  it("falls back to prod signatures when the requested mode is missing", async () => {
+    const httpMock = {
+      get: vi.fn().mockResolvedValue([
+        {
+          descriptors_calldata: {
+            TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t: {
+              a9059cbb: {
+                type: "calldata",
+                version: "v1",
+                transaction_info: {
+                  descriptor: {
+                    data: "0102",
+                    signatures: { prod: "bb" },
+                  },
+                },
+                enums: {},
+                fields: [],
+              },
+            },
+          },
+        },
+      ]),
+    };
+    const config = {
+      cal: {
+        url: "https://crypto-assets-service.api.ledger.com/v1",
+        mode: "test",
+        branch: "main",
+      },
+    } as ContextModuleServiceConfig;
+    const dataSource = new HttpTronCalldataDescriptorDataSource(
+      config,
+      httpMock as unknown as DmkNetworkClient,
+    );
+
+    const result = await dataSource.getCalldataDescriptors({
+      contractAddress: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+      selector: "0xa9059cbb",
+    });
+
+    expect(result.extract()).toStrictEqual([
+      {
+        type: ClearSignContextType.TRON_TRANSACTION_INFO,
+        payload: "010281ff01bb",
+      },
+    ]);
+  });
+
+  it("returns an error when the CAL response is not an array", async () => {
+    const httpMock = {
+      get: vi.fn().mockResolvedValue({ descriptors_calldata: {} }),
+    };
+    const config = {
+      cal: {
+        url: "https://crypto-assets-service.api.ledger.com/v1",
+        mode: "prod",
+        branch: "main",
+      },
+    } as ContextModuleServiceConfig;
+    const dataSource = new HttpTronCalldataDescriptorDataSource(
+      config,
+      httpMock as unknown as DmkNetworkClient,
+    );
+
+    const result = await dataSource.getCalldataDescriptors({
+      contractAddress: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+      selector: "a9059cbb",
+    });
+
+    expect(result.isLeft()).toBe(true);
+  });
 });

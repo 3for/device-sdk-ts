@@ -34,6 +34,7 @@ import { tokenInfoModuleFactory } from "@/modules/solana/token-info/di/tokenInfo
 import { solanaTrustedNameModuleFactory } from "@/modules/solana/trusted-name/di/trustedNameModuleFactory";
 import { tronCalldataModuleFactory } from "@/modules/tron/calldata/di/tronCalldataModuleFactory";
 import { trc10TokenModuleFactory } from "@/modules/tron/trc10/di/trc10TokenModuleFactory";
+import { trc20TokenModuleFactory } from "@/modules/tron/trc20/di/trc20TokenModuleFactory";
 import { ContextModuleChainID } from "@/shared/domain/ContextModuleChainID";
 import { networkModuleFactory } from "@/shared/network/di/networkModuleFactory";
 
@@ -98,6 +99,7 @@ export const makeContainer = ({ config }: MakeContainerArgs) => {
     case ContextModuleChainID.Tron:
       container.loadSync(
         trc10TokenModuleFactory(),
+        trc20TokenModuleFactory(),
         tronCalldataModuleFactory(),
       );
       break;

@@ -35,6 +35,7 @@ import { tokenInfoTypes } from "@/modules/solana/token-info/di/tokenInfoTypes";
 import { solanaTrustedNameTypes } from "@/modules/solana/trusted-name/di/trustedNameTypes";
 import { tronCalldataTypes } from "@/modules/tron/calldata/di/tronCalldataTypes";
 import { trc10TokenTypes } from "@/modules/tron/trc10/di/trc10TokenTypes";
+import { trc20TokenTypes } from "@/modules/tron/trc20/di/trc20TokenTypes";
 import { type ContextFieldLoader } from "@/shared/domain/ContextFieldLoader";
 import { type ContextLoader } from "@/shared/domain/ContextLoader";
 import { ContextModuleChainID } from "@/shared/domain/ContextModuleChainID";
@@ -161,6 +162,9 @@ export class DefaultContextModule implements ContextModule {
         return [
           this._container.get<ContextLoader>(
             trc10TokenTypes.Trc10TokenContextLoader,
+          ),
+          this._container.get<ContextLoader>(
+            trc20TokenTypes.Trc20TokenContextLoader,
           ),
           this._container.get<ContextLoader>(
             tronCalldataTypes.TronCalldataContextLoader,

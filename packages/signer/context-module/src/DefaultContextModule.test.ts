@@ -184,6 +184,22 @@ describe("DefaultContextModule", () => {
     ]);
   });
 
+  it("should initialize Tron default loaders", () => {
+    const contextModule = new DefaultContextModule({
+      ...defaultContextModuleConfig,
+      chain: ContextModuleChainID.Tron,
+      defaultLoaders: true,
+    });
+
+    expect(
+      contextModule["_loaders"].map((loader) => loader.constructor.name),
+    ).toEqual([
+      "Trc10TokenContextLoader",
+      "Trc20TokenContextLoader",
+      "TronCalldataContextLoader",
+    ]);
+  });
+
   it("should call the typed data loader", async () => {
     const contextModule = new DefaultContextModule({
       ...defaultContextModuleConfig,
