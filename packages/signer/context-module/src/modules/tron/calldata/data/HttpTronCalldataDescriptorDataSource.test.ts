@@ -1,9 +1,19 @@
-import { type DmkNetworkClient } from "@ledgerhq/device-management-kit";
+import {
+  DeviceModelId,
+  type DmkNetworkClient,
+} from "@ledgerhq/device-management-kit";
 
 import { type ContextModuleServiceConfig } from "@/config/model/ContextModuleConfig";
+import { type PkiCertificateLoader } from "@/modules/multichain/pki/domain/PkiCertificateLoader";
+import { KeyId } from "@/modules/multichain/pki/model/KeyId";
+import { KeyUsage } from "@/modules/multichain/pki/model/KeyUsage";
 import { ClearSignContextType } from "@/shared/model/ClearSignContext";
 
 import { HttpTronCalldataDescriptorDataSource } from "./HttpTronCalldataDescriptorDataSource";
+
+const certificateLoaderMock: PkiCertificateLoader = {
+  loadCertificate: vi.fn().mockResolvedValue(undefined),
+};
 
 describe("HttpTronCalldataDescriptorDataSource", () => {
   it("fetches and maps Tron calldata descriptors", async () => {
@@ -45,6 +55,7 @@ describe("HttpTronCalldataDescriptorDataSource", () => {
     } as ContextModuleServiceConfig;
     const dataSource = new HttpTronCalldataDescriptorDataSource(
       config,
+      certificateLoaderMock,
       httpMock as unknown as DmkNetworkClient,
     );
 
@@ -98,6 +109,7 @@ describe("HttpTronCalldataDescriptorDataSource", () => {
     } as ContextModuleServiceConfig;
     const dataSource = new HttpTronCalldataDescriptorDataSource(
       config,
+      certificateLoaderMock,
       httpMock as unknown as DmkNetworkClient,
     );
 
@@ -141,6 +153,7 @@ describe("HttpTronCalldataDescriptorDataSource", () => {
     } as ContextModuleServiceConfig;
     const dataSource = new HttpTronCalldataDescriptorDataSource(
       config,
+      certificateLoaderMock,
       httpMock as unknown as DmkNetworkClient,
     );
 
@@ -189,6 +202,7 @@ describe("HttpTronCalldataDescriptorDataSource", () => {
     } as ContextModuleServiceConfig;
     const dataSource = new HttpTronCalldataDescriptorDataSource(
       config,
+      certificateLoaderMock,
       httpMock as unknown as DmkNetworkClient,
     );
 
@@ -218,6 +232,7 @@ describe("HttpTronCalldataDescriptorDataSource", () => {
     } as ContextModuleServiceConfig;
     const dataSource = new HttpTronCalldataDescriptorDataSource(
       config,
+      certificateLoaderMock,
       httpMock as unknown as DmkNetworkClient,
     );
 
@@ -227,5 +242,84 @@ describe("HttpTronCalldataDescriptorDataSource", () => {
     });
 
     expect(result.isLeft()).toBe(true);
+  });
+
+  it("adds calldata certificates to signed descriptor contexts when a device model is provided", async () => {
+    const httpMock = {
+      get: vi.fn().mockResolvedValue([
+        {
+          descriptors_calldata: {
+            TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t: {
+              a9059cbb: {
+                type: "calldata",
+                version: "v1",
+                transaction_info: {
+                  descriptor: {
+                    data: "0102",
+                    signatures: { prod: "bb" },
+                  },
+                },
+                enums: {
+                  "1": {
+                    "2": {
+                      data: "0a0b",
+                      signatures: { prod: "cc" },
+                    },
+                  },
+                },
+                fields: [{ descriptor: "1122" }],
+              },
+            },
+          },
+        },
+      ]),
+    };
+    const certificate = {
+      keyUsageNumber: 10,
+      payload: Uint8Array.from([1, 2, 3]),
+    };
+    const certificateLoader: PkiCertificateLoader = {
+      loadCertificate: vi.fn().mockResolvedValue(certificate),
+    };
+    const config = {
+      cal: {
+        url: "https://crypto-assets-service.api.ledger.com/v1",
+        mode: "prod",
+        branch: "main",
+      },
+    } as ContextModuleServiceConfig;
+    const dataSource = new HttpTronCalldataDescriptorDataSource(
+      config,
+      certificateLoader,
+      httpMock as unknown as DmkNetworkClient,
+    );
+
+    const result = await dataSource.getCalldataDescriptors({
+      contractAddress: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+      selector: "a9059cbb",
+      deviceModelId: DeviceModelId.FLEX,
+    });
+
+    expect(certificateLoader.loadCertificate).toHaveBeenCalledWith({
+      targetDevice: DeviceModelId.FLEX,
+      keyUsage: KeyUsage.Calldata,
+      keyId: KeyId.CalCalldataKey,
+    });
+    expect(result.extract()).toStrictEqual([
+      {
+        type: ClearSignContextType.TRON_TRANSACTION_INFO,
+        payload: "010281ff01bb",
+        certificate,
+      },
+      {
+        type: ClearSignContextType.TRON_ENUM,
+        payload: "0a0b81ff01cc",
+        certificate,
+      },
+      {
+        type: ClearSignContextType.TRON_TRANSACTION_FIELD_DESCRIPTION,
+        payload: "1122",
+      },
+    ]);
   });
 });

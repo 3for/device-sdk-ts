@@ -4,6 +4,7 @@ import {
   type TronClearSignContext,
   TronClearSignContextType,
 } from "@ledgerhq/context-module";
+import { DeviceModelId } from "@ledgerhq/device-management-kit";
 
 import { type TransactionSubset } from "@internal/transaction/model/TransactionSubset";
 import { type TronTransactionMapperService } from "@internal/transaction/service/TronTransactionMapperService";
@@ -130,6 +131,25 @@ describe("BuildTronContextsTask", () => {
     ]);
     expect(transactionMapper.map).toHaveBeenCalledWith(rawData);
     expect(contextModule.getContexts).toHaveBeenCalledWith(TRANSACTION);
+  });
+
+  it("passes the device model to the context module transaction", async () => {
+    const contextModule = makeContextModule(vi.fn().mockResolvedValue([]));
+
+    await new BuildTronContextsTask({
+      contextModule,
+      transactionMapper: makeTransactionMapper(),
+      rawData: Uint8Array.from([0x01]),
+      options: {
+        clearSigningMode: "auto",
+      },
+      deviceModelId: DeviceModelId.FLEX,
+    }).run();
+
+    expect(contextModule.getContexts).toHaveBeenCalledWith({
+      ...TRANSACTION,
+      deviceModelId: DeviceModelId.FLEX,
+    });
   });
 
   it("falls back to no contexts when the context module fails", async () => {

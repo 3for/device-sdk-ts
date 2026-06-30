@@ -346,6 +346,7 @@ export class SignTransactionDeviceAction extends XStateDeviceAction<
           contextModule: input.contextModule,
           rawData: input.rawData,
           options: input.options,
+          deviceModelId: internalApi.getDeviceModel().id,
         }).run(),
       signTransaction: ({ input }) =>
         new SendSignTransactionTask(internalApi, {

@@ -98,6 +98,7 @@ export const makeContainer = ({ config }: MakeContainerArgs) => {
       break;
     case ContextModuleChainID.Tron:
       container.loadSync(
+        nanoPkiModuleFactory(),
         trc10TokenModuleFactory(),
         trc20TokenModuleFactory(),
         tronCalldataModuleFactory(),

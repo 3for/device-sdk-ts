@@ -79,6 +79,9 @@ export class TronCalldataContextLoader
         const result = await this.dataSource.getCalldataDescriptors({
           contractAddress: contract.contractAddress!,
           selector: contract.data!.slice(0, 8),
+          ...(input.deviceModelId !== undefined && {
+            deviceModelId: input.deviceModelId,
+          }),
         });
 
         return result.caseOf<ClearSignContext[]>({

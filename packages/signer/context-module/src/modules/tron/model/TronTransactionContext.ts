@@ -1,3 +1,5 @@
+import { type DeviceModelId } from "@ledgerhq/device-management-kit";
+
 export enum TronContractType {
   AccountCreateContract = 0,
   TransferContract = 1,
@@ -54,6 +56,7 @@ export type TronContract = {
 
 export type TronTransactionContext = {
   readonly contracts: readonly TronContract[];
+  readonly deviceModelId?: DeviceModelId;
   readonly refBlockBytes?: string;
   readonly refBlockHash?: string;
   readonly expiration?: bigint;

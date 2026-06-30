@@ -7,6 +7,7 @@ import {
   CommandResultFactory,
   type InternalApi,
   InvalidStatusWordError,
+  LoadCertificateCommand,
 } from "@ledgerhq/device-management-kit";
 
 import { ProvideEnumValueCommand } from "@internal/app-binder/command/ProvideEnumValueCommand";
@@ -32,15 +33,26 @@ export class ProvideContextTask {
   ) {}
 
   async run(): Promise<CommandResult<unknown, TronErrorCodes>> {
-    const { type, payload } = this.args.context;
+    const { type, payload, certificate } = this.args.context;
+
+    if (type === TronClearSignContextType.TRC10_TOKEN) {
+      return CommandResultFactory({
+        error: new InvalidStatusWordError(
+          "TRC10 token context must be provided through the legacy sign transaction flow",
+        ),
+      });
+    }
+
+    if (certificate !== undefined) {
+      await this.api.sendCommand(
+        new LoadCertificateCommand({
+          keyUsage: certificate.keyUsageNumber,
+          certificate: certificate.payload,
+        }),
+      );
+    }
 
     switch (type) {
-      case TronClearSignContextType.TRC10_TOKEN:
-        return CommandResultFactory({
-          error: new InvalidStatusWordError(
-            "TRC10 token context must be provided through the legacy sign transaction flow",
-          ),
-        });
       case TronClearSignContextType.TRC20_TOKEN:
         return this.api.sendCommand(
           new ProvideTrc20TokenInformationCommand({ payload }),

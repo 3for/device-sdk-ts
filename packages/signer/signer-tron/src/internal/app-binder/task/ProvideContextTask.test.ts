@@ -5,6 +5,7 @@ import {
   type InternalApi,
   InvalidStatusWordError,
   isSuccessCommandResult,
+  LoadCertificateCommand,
 } from "@ledgerhq/device-management-kit";
 
 import { ProvideNFTInformationCommand } from "@internal/app-binder/command/ProvideNFTInformationCommand";
@@ -80,6 +81,23 @@ describe("ProvideContextTask", () => {
     ).toStrictEqual(
       Uint8Array.from([0xe0, 0x26, 0x01, 0x00, 0x04, 0x00, 0x02, 0x01, 0x02]),
     );
+  });
+
+  it("loads the context certificate before providing the context", async () => {
+    await new ProvideContextTask(api, {
+      context: {
+        type: TronClearSignContextType.TRANSACTION_INFO,
+        payload: "0102",
+        certificate: {
+          keyUsageNumber: 10,
+          payload: Uint8Array.from([1, 2, 3]),
+        },
+      },
+    }).run();
+
+    expect(sent).toHaveLength(2);
+    expect(sent[0]).toBeInstanceOf(LoadCertificateCommand);
+    expect(sent[1]).toBeInstanceOf(ProvideTransactionInformationCommand);
   });
 
   it("propagates a device error", async () => {

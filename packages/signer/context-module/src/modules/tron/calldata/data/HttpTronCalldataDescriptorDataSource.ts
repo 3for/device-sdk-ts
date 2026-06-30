@@ -7,6 +7,11 @@ import {
   type ContextModuleCalMode,
   type ContextModuleServiceConfig,
 } from "@/config/model/ContextModuleConfig";
+import { pkiTypes } from "@/modules/multichain/pki/di/pkiTypes";
+import { type PkiCertificateLoader } from "@/modules/multichain/pki/domain/PkiCertificateLoader";
+import { KeyId } from "@/modules/multichain/pki/model/KeyId";
+import { KeyUsage } from "@/modules/multichain/pki/model/KeyUsage";
+import { type PkiCertificate } from "@/modules/multichain/pki/model/PkiCertificate";
 import { type TronClearSignContextSuccess } from "@/modules/tron/model/TronClearSignContext";
 import { normalizeHex } from "@/modules/tron/shared/TronHexStringUtils";
 import {
@@ -73,6 +78,8 @@ export class HttpTronCalldataDescriptorDataSource
   constructor(
     @inject(configTypes.Config)
     private readonly config: ContextModuleServiceConfig,
+    @inject(pkiTypes.PkiCertificateLoader)
+    private readonly certificateLoader: PkiCertificateLoader,
     @inject(networkTypes.NetworkClient)
     private readonly http: DmkNetworkClient,
   ) {}
@@ -80,6 +87,7 @@ export class HttpTronCalldataDescriptorDataSource
   async getCalldataDescriptors({
     contractAddress,
     selector,
+    deviceModelId,
   }: GetTronCalldataDescriptorsParams): Promise<
     Either<Error, TronClearSignContextSuccess[]>
   > {
@@ -125,7 +133,15 @@ export class HttpTronCalldataDescriptorDataSource
 
       const descriptor = getDescriptorForSelector(selectorMap, selector);
       if (this.isCalldataDescriptorV1(descriptor)) {
-        return Right(this.mapDescriptorToContexts(descriptor));
+        const certificate =
+          deviceModelId === undefined
+            ? undefined
+            : await this.certificateLoader.loadCertificate({
+                targetDevice: deviceModelId,
+                keyUsage: KeyUsage.Calldata,
+                keyId: KeyId.CalCalldataKey,
+              });
+        return Right(this.mapDescriptorToContexts(descriptor, certificate));
       }
     }
 
@@ -138,8 +154,9 @@ export class HttpTronCalldataDescriptorDataSource
 
   private mapDescriptorToContexts(
     descriptor: TronCalldataDescriptorV1,
+    certificate?: PkiCertificate,
   ): TronClearSignContextSuccess[] {
-    const info = this.mapTransactionInfo(descriptor);
+    const info = this.mapTransactionInfo(descriptor, certificate);
     if (info === undefined) {
       return [];
     }
@@ -150,6 +167,7 @@ export class HttpTronCalldataDescriptorDataSource
           this.mapSignedDescriptor(
             ClearSignContextType.TRON_ENUM,
             enumDescriptor,
+            certificate,
           ),
         )
         .filter(
@@ -170,10 +188,12 @@ export class HttpTronCalldataDescriptorDataSource
 
   private mapTransactionInfo(
     descriptor: TronCalldataDescriptorV1,
+    certificate?: PkiCertificate,
   ): TronClearSignContextSuccess | undefined {
     return this.mapSignedDescriptor(
       ClearSignContextType.TRON_TRANSACTION_INFO,
       descriptor.transaction_info.descriptor,
+      certificate,
     );
   }
 
@@ -182,6 +202,7 @@ export class HttpTronCalldataDescriptorDataSource
       | ClearSignContextType.TRON_TRANSACTION_INFO
       | ClearSignContextType.TRON_ENUM,
     descriptor: TronCalldataTransactionDescriptor,
+    certificate?: PkiCertificate,
   ): TronClearSignContextSuccess | undefined {
     const signature = getSignature(
       descriptor.signatures,
@@ -198,6 +219,7 @@ export class HttpTronCalldataDescriptorDataSource
         normalizeHex(signature),
         INFO_SIGNATURE_TAG,
       ),
+      ...(certificate !== undefined && { certificate }),
     } as ClearSignContextSuccess<typeof type> as TronClearSignContextSuccess;
   }
 
