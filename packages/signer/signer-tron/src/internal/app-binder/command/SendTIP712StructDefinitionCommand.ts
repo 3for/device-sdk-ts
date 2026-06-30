@@ -54,6 +54,7 @@ enum Type {
   String,
   FixedSizedBytes,
   DynamicSizedBytes,
+  TrcToken,
 }
 
 export class SendTIP712StructDefinitionCommand
@@ -160,6 +161,8 @@ export class SendTIP712StructDefinitionCommand
         return Type.Int;
       case "uint":
         return Type.Uint;
+      case "trcToken":
+        return Type.TrcToken;
       case "address":
         return Type.Address;
       case "bool":

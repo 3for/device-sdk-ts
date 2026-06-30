@@ -1,5 +1,9 @@
+import { Nothing } from "purify-ts";
+
 import { type TypedData } from "@api/model/TypedData";
 import {
+  ArrayType,
+  PrimitiveType,
   TypedDataValueArray,
   TypedDataValueField,
   TypedDataValueRoot,
@@ -73,5 +77,52 @@ describe("DefaultTypedDataParserService", () => {
   it("should fail on a malformed message", () => {
     const broken = { ...MAIL, message: { from: { name: "Cow" } } };
     expect(parser.parse(broken).isLeft()).toBe(true);
+  });
+
+  it("should parse Tron trcToken fields as uint256 values", () => {
+    const typedData: TypedData = {
+      domain: {
+        name: "TRON Mail",
+        version: "1",
+        chainId: 728126428,
+      },
+      types: {
+        Asset: [
+          { name: "trcTokenId", type: "trcToken" },
+          { name: "trcTokenArr", type: "trcToken[]" },
+        ],
+      },
+      primaryType: "Asset",
+      message: {
+        trcTokenId: "1002000",
+        trcTokenArr: ["1002000", "1002001"],
+      },
+    };
+
+    const result = parser.parse(typedData);
+
+    expect(result.isRight()).toBe(true);
+    const { types, message } = result.unsafeCoerce();
+    expect(types["Asset"]?.["trcTokenId"]).toStrictEqual(
+      new PrimitiveType("trcToken", "trcToken", Nothing),
+    );
+    expect(types["Asset"]?.["trcTokenArr"]).toStrictEqual(
+      new ArrayType(
+        "trcToken[]",
+        new PrimitiveType("trcToken", "trcToken", Nothing),
+        "trcToken",
+        Nothing,
+        [Nothing],
+      ),
+    );
+    expect(
+      message
+        .filter((value) => value.value instanceof TypedDataValueField)
+        .map((value) => Array.from((value.value as TypedDataValueField).data)),
+    ).toStrictEqual([
+      [0x0f, 0x4a, 0x10],
+      [0x0f, 0x4a, 0x10],
+      [0x0f, 0x4a, 0x11],
+    ]);
   });
 });

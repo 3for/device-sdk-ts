@@ -124,6 +124,10 @@ export class TypedDataParser {
   }
 
   private tryParsePrimitiveType(type: string): Maybe<PrimitiveType> {
+    if (type === "trcToken") {
+      return Just(new PrimitiveType("trcToken", "trcToken", Nothing));
+    }
+
     // int8 to int256 and uint8 to uint256
     {
       const match = type.match(/^(((u?)int)(\d+))$/);

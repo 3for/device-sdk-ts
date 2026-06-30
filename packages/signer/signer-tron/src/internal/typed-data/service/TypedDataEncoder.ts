@@ -31,6 +31,7 @@ export function encodeTypedDataValue(
     case "bool":
     case "uint":
     case "int":
+    case "trcToken":
       // Convert boolean values to numbers, so it can then be encoded as a number
       if (type.name === "bool" && typeof value === "boolean") {
         value = Number(value);
@@ -42,7 +43,9 @@ export function encodeTypedDataValue(
         ? Nothing
         : encodeTypedDataNumber(
             type.name,
-            type.size.mapOrDefault((s) => s * 8, 1), // Size in bits
+            type.name === "trcToken"
+              ? 256
+              : type.size.mapOrDefault((s) => s * 8, 1), // Size in bits
             value,
           );
   }

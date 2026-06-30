@@ -1,6 +1,10 @@
 import { Just, Nothing } from "purify-ts";
 
-import { PrimitiveType, StructType } from "@internal/typed-data/model/Types";
+import {
+  ArrayType,
+  PrimitiveType,
+  StructType,
+} from "@internal/typed-data/model/Types";
 
 import {
   SendTIP712StructDefinitionCommand,
@@ -70,5 +74,43 @@ describe("SendTIP712StructDefinitionCommand", () => {
     expect(data[0]).toBe(0x07);
     // next is LV field name (len 4)
     expect(data[1]).toBe(4);
+  });
+
+  it("should encode a trcToken field with Tron type code", () => {
+    const raw = new SendTIP712StructDefinitionCommand({
+      command: StructDefinitionCommand.Field,
+      name: "tokenId",
+      type: new PrimitiveType("trcToken", "trcToken", Nothing),
+    })
+      .getApdu()
+      .getRawApdu();
+    const data = raw.slice(5);
+    // trcToken is app-tron's TYPE_SOL_TRCTOKEN (0x08), with no type-size byte.
+    expect(data[0]).toBe(0x08);
+    expect(data[1]).toBe(7);
+    expect(Buffer.from(data.slice(2, 9)).toString("ascii")).toBe("tokenId");
+  });
+
+  it("should encode a trcToken array with Tron type code", () => {
+    const raw = new SendTIP712StructDefinitionCommand({
+      command: StructDefinitionCommand.Field,
+      name: "tokenIds",
+      type: new ArrayType(
+        "trcToken[]",
+        new PrimitiveType("trcToken", "trcToken", Nothing),
+        "trcToken",
+        Nothing,
+        [Nothing],
+      ),
+    })
+      .getApdu()
+      .getRawApdu();
+    const data = raw.slice(5);
+    // array bit (0x80) | trcToken type code (0x08)
+    expect(data[0]).toBe(0x88);
+    expect(data[1]).toBe(1);
+    expect(data[2]).toBe(0);
+    expect(data[3]).toBe(8);
+    expect(Buffer.from(data.slice(4, 12)).toString("ascii")).toBe("tokenIds");
   });
 });

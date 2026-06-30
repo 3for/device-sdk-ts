@@ -6,6 +6,7 @@ export type FieldType = PrimitiveType | ArrayType | StructType;
 export type PrimitiveTypeName =
   | "int"
   | "uint"
+  | "trcToken"
   | "address"
   | "bytes"
   | "string"
