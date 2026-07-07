@@ -2,16 +2,12 @@ import {
   type ContextModule,
   isTronClearSignContextSuccess,
   type TronClearSignContext,
-  type TronContractType as ContextModuleTronContractType,
   type TronTransactionContext,
 } from "@ledgerhq/context-module";
 import { type DeviceModelId } from "@ledgerhq/device-management-kit";
 
 import { type TransactionOptions } from "@api/model/TransactionOptions";
-import {
-  type TransactionSubset,
-  type TronContractType,
-} from "@internal/transaction/model/TransactionSubset";
+import { type TransactionSubset } from "@internal/transaction/model/TransactionSubset";
 import { DefaultTronTransactionMapperService } from "@internal/transaction/service/DefaultTronTransactionMapperService";
 import { type TronTransactionMapperService } from "@internal/transaction/service/TronTransactionMapperService";
 
@@ -30,17 +26,7 @@ function toContextModuleTransaction(
   return {
     ...transaction,
     ...(deviceModelId !== undefined && { deviceModelId }),
-    contracts: transaction.contracts.map((contract) => ({
-      ...contract,
-      type: toContextModuleContractType(contract.type),
-    })),
   };
-}
-
-function toContextModuleContractType(
-  type: TronContractType,
-): ContextModuleTronContractType {
-  return type as number as ContextModuleTronContractType;
 }
 
 export class BuildTronContextsTask {

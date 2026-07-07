@@ -38,6 +38,7 @@ export enum TronContractType {
   WithdrawExpireUnfreezeContract = 56,
   DelegateResourceContract = 57,
   UnDelegateResourceContract = 58,
+  CancelAllUnfreezeV2Contract = 59,
 }
 
 export type TronContract = {
