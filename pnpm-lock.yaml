@@ -1883,6 +1883,9 @@ importers:
       '@ledgerhq/device-management-kit':
         specifier: workspace:^
         version: link:../../device-management-kit
+      '@ledgerhq/device-transport-kit-node-hid':
+        specifier: workspace:^
+        version: link:../../transport/node-hid
       '@ledgerhq/eslint-config-dsdk':
         specifier: workspace:^
         version: link:../../config/eslint
@@ -1904,6 +1907,9 @@ importers:
       ts-node:
         specifier: 'catalog:'
         version: 10.9.2(@types/node@24.3.0)(typescript@5.9.2)
+      tsx:
+        specifier: 'catalog:'
+        version: 4.19.2
 
   packages/signer/signer-utils:
     dependencies:

@@ -35,7 +35,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "example:nile": "tsx examples/nile-device-transfer.ts"
   },
   "dependencies": {
     "@ledgerhq/signer-utils": "workspace:^",
@@ -49,13 +50,15 @@
   "devDependencies": {
     "@ledgerhq/context-module": "workspace:^",
     "@ledgerhq/device-management-kit": "workspace:^",
+    "@ledgerhq/device-transport-kit-node-hid": "workspace:^",
     "@ledgerhq/ldmk-tool": "workspace:^",
     "@ledgerhq/eslint-config-dsdk": "workspace:^",
     "@ledgerhq/prettier-config-dsdk": "workspace:^",
     "@ledgerhq/tsconfig-dsdk": "workspace:^",
     "@ledgerhq/vitest-config-dmk": "workspace:^",
     "rxjs": "catalog:",
-    "ts-node": "catalog:"
+    "ts-node": "catalog:",
+    "tsx": "catalog:"
   },
   "peerDependencies": {
     "@ledgerhq/context-module": "workspace:^",

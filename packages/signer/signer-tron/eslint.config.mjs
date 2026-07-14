@@ -10,4 +10,15 @@ export default [
       },
     },
   },
+  {
+    files: ["examples/**/*.ts"],
+    languageOptions: {
+      parserOptions: {
+        project: "./examples/tsconfig.json",
+      },
+    },
+    rules: {
+      "no-restricted-globals": "off",
+    },
+  },
 ];
