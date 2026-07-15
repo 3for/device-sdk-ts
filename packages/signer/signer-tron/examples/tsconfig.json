@@ -5,5 +5,5 @@
     "noEmit": true,
     "rootDir": "."
   },
-  "include": ["./nile-device-transfer.ts"]
+  "include": ["./*.ts"]
 }

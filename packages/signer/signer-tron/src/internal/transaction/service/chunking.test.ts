@@ -1,3 +1,5 @@
+import { APDU_MAX_PAYLOAD } from "@ledgerhq/device-management-kit";
+
 import { encodeDerivationPath } from "@internal/shared/utils/encodeDerivationPath";
 
 import { buildTransactionChunks } from "./chunking";
@@ -15,12 +17,36 @@ const TRANSFER_RAW_DATA = Uint8Array.from(
 function memoField(size: number, fill: number): Uint8Array {
   const lenLo = size & 0x7f;
   const lenHi = size >> 7;
-  return Uint8Array.from([
+  const header = Uint8Array.from([
     0x52, // field 10, wire type 2
     lenLo | 0x80,
     lenHi,
-    ...new Array(size).fill(fill),
   ]);
+  const field = new Uint8Array(header.length + size);
+  field.set(header);
+  field.fill(fill, header.length);
+  return field;
+}
+
+function reassembleRawData(
+  chunks: readonly { chunk: Uint8Array }[],
+): Uint8Array {
+  const headerLength = encodeDerivationPath(PATH).length;
+  const rawLength = chunks.reduce(
+    (length, { chunk }, index) =>
+      length + chunk.length - (index === 0 ? headerLength : 0),
+    0,
+  );
+  const rawData = new Uint8Array(rawLength);
+  let offset = 0;
+
+  chunks.forEach(({ chunk }, index) => {
+    const rawChunk = index === 0 ? chunk.slice(headerLength) : chunk;
+    rawData.set(rawChunk, offset);
+    offset += rawChunk.length;
+  });
+
+  return rawData;
 }
 
 describe("buildTransactionChunks", () => {
@@ -36,27 +62,40 @@ describe("buildTransactionChunks", () => {
     );
   });
 
-  it("should split on field boundaries with FIRST/LAST p1 for a large transaction", () => {
-    const raw = Uint8Array.from([
-      ...memoField(200, 0xaa),
-      ...memoField(200, 0xbb),
-    ]);
+  it("should split a single large protobuf field across APDUs", () => {
+    const raw = memoField(320, 0xaa);
     const chunks = buildTransactionChunks(PATH, raw);
 
     expect(chunks).toHaveLength(2);
     expect(chunks.map((c) => c.p1)).toStrictEqual([0x00, 0x90]);
-
-    // Reassembling the chunks (minus the path header in chunk 0) yields raw_data.
-    const header = encodeDerivationPath(PATH);
-    const reassembled = Uint8Array.from([
-      ...chunks[0]!.chunk.slice(header.length),
-      ...chunks[1]!.chunk,
-    ]);
-    expect(reassembled).toStrictEqual(raw);
+    expect(chunks.every(({ chunk }) => chunk.length <= APDU_MAX_PAYLOAD)).toBe(
+      true,
+    );
+    expect(reassembleRawData(chunks)).toStrictEqual(raw);
   });
 
-  it("should throw when a single field exceeds the chunk size", () => {
-    const raw = memoField(300, 0xcc);
-    expect(() => buildTransactionChunks(PATH, raw)).toThrow();
+  it("should use MORE chunks and preserve a 3 KiB transaction exactly", () => {
+    const raw = Uint8Array.from(
+      { length: 3 * 1024 },
+      (_value, index) => index % 256,
+    );
+    const chunks = buildTransactionChunks(PATH, raw);
+
+    expect(chunks.length).toBeGreaterThan(2);
+    expect(chunks[0]!.p1).toBe(0x00);
+    expect(chunks.at(-1)!.p1).toBe(0x90);
+    expect(chunks.slice(1, -1).every(({ p1 }) => p1 === 0x80)).toBe(true);
+    expect(chunks.every(({ chunk }) => chunk.length <= APDU_MAX_PAYLOAD)).toBe(
+      true,
+    );
+    expect(reassembleRawData(chunks)).toStrictEqual(raw);
+  });
+
+  it("should stream arbitrary bytes without parsing protobuf on the host", () => {
+    const raw = new Uint8Array(APDU_MAX_PAYLOAD * 2 + 1).fill(0xff);
+
+    const chunks = buildTransactionChunks(PATH, raw);
+
+    expect(reassembleRawData(chunks)).toStrictEqual(raw);
   });
 });

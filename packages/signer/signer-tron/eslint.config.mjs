@@ -19,6 +19,7 @@ export default [
     },
     rules: {
       "no-restricted-globals": "off",
+      "no-restricted-imports": "off",
     },
   },
 ];

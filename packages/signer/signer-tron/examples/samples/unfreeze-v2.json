@@ -1,0 +1,6 @@
+{
+  "owner_address": "$OWNER_ADDRESS_BASE58",
+  "unfreeze_balance": 1000000,
+  "resource": "BANDWIDTH",
+  "visible": true
+}
