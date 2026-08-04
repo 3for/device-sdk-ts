@@ -4,14 +4,19 @@ import {
   DeviceExchangeError,
 } from "@ledgerhq/device-management-kit";
 
-// Status words from app-tron's src/app_errors.h
+// Status words returned by app-tron's src/app_errors.h and Ledger SDK
+// status_words.h (mirrored by app-tron's fuzzing headers).
 export type TronErrorCodes =
   | "6700"
+  | "6980"
   | "6982"
-  | "6985"
   | "6984"
+  | "6985"
+  | "6a00"
   | "6a80"
+  | "6a84"
   | "6a87"
+  | "6a88"
   | "6a8a"
   | "6a8b"
   | "6a8c"
@@ -23,11 +28,15 @@ export type TronErrorCodes =
 
 export const TRON_APP_ERRORS: CommandErrors<TronErrorCodes> = {
   "6700": { message: "Incorrect length" },
+  "6980": { message: "Command not allowed" },
   "6982": { message: "Security status not satisfied (Canceled by user)" },
-  "6985": { message: "Condition of use not satisfied" },
   "6984": { message: "Plugin not found" },
+  "6985": { message: "Condition of use not satisfied" },
+  "6a00": { message: "Parameter error without information" },
   "6a80": { message: "Incorrect data" },
+  "6a84": { message: "Insufficient memory" },
   "6a87": { message: "Wrong data length" },
+  "6a88": { message: "Referenced data not found" },
   "6a8a": { message: "Incorrect BIP32 path" },
   "6a8b": { message: "Missing setting: data not allowed" },
   "6a8c": { message: "Missing setting: sign by hash not allowed" },
