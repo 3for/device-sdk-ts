@@ -37,6 +37,8 @@ export const P1 = {
   LAST: 0x90,
   FIRST_CHUNK: 0x01,
   TRC10_NAME: 0xa0,
+  TIP712_SIGN: 0x00,
+  TIP712_INIT: 0x01,
 } as const;
 
 // P2 (see apdu_constants.h)

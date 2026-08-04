@@ -10,24 +10,34 @@ import { DefaultTronTransactionMapperService } from "./DefaultTronTransactionMap
 
 const PATH = "44'/195'/0'/0/0";
 const EXPECTED_SUPPORTED_TYPES = [
+  TronContractType.AccountCreateContract,
   TronContractType.TransferContract,
   TronContractType.TransferAssetContract,
   TronContractType.VoteWitnessContract,
   TronContractType.WitnessCreateContract,
+  TronContractType.AssetIssueContract,
   TronContractType.WitnessUpdateContract,
+  TronContractType.ParticipateAssetIssueContract,
   TronContractType.AccountUpdateContract,
   TronContractType.FreezeBalanceContract,
   TronContractType.UnfreezeBalanceContract,
   TronContractType.WithdrawBalanceContract,
+  TronContractType.UnfreezeAssetContract,
+  TronContractType.UpdateAssetContract,
   TronContractType.ProposalCreateContract,
   TronContractType.ProposalApproveContract,
   TronContractType.ProposalDeleteContract,
+  TronContractType.SetAccountIdContract,
+  TronContractType.CreateSmartContract,
   TronContractType.TriggerSmartContract,
+  TronContractType.UpdateSettingContract,
   TronContractType.ExchangeCreateContract,
   TronContractType.ExchangeInjectContract,
   TronContractType.ExchangeWithdrawContract,
   TronContractType.ExchangeTransactionContract,
+  TronContractType.UpdateEnergyLimitContract,
   TronContractType.AccountPermissionUpdateContract,
+  TronContractType.ClearABIContract,
   TronContractType.UpdateBrokerageContract,
   TronContractType.FreezeBalanceV2Contract,
   TronContractType.UnfreezeBalanceV2Contract,
@@ -62,13 +72,13 @@ function reassembleRawData(
 }
 
 describe("app-tron supported transaction raw fixtures", () => {
-  it("contains each of the 25 firmware-supported contract types exactly once", () => {
+  it("contains each of the 35 firmware-supported contract types exactly once", () => {
     const actualTypes = SUPPORTED_TRANSACTION_RAW_FIXTURES.map(
       ({ contractType }) => contractType,
     );
 
     expect(actualTypes).toStrictEqual(EXPECTED_SUPPORTED_TYPES);
-    expect(new Set(actualTypes).size).toBe(25);
+    expect(new Set(actualTypes).size).toBe(35);
   });
 
   it.each(SUPPORTED_TRANSACTION_RAW_FIXTURES)(
@@ -109,6 +119,7 @@ describe("app-tron supported transaction raw fixtures", () => {
     "WitnessCreateContract",
     "ProposalCreateContract",
     "AccountPermissionUpdateContract",
+    "CreateSmartContract",
   ])("keeps the large $contractName fixture above one APDU", (contractName) => {
     const fixture = SUPPORTED_TRANSACTION_RAW_FIXTURES.find(
       (candidate) => candidate.contractName === contractName,

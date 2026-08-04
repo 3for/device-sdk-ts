@@ -7,6 +7,7 @@ import {
 import { Just, Left, Right } from "purify-ts";
 
 import { type TypedData } from "@api/model/TypedData";
+import { InitTIP712Command } from "@internal/app-binder/command/InitTIP712Command";
 import { SignTIP712Command } from "@internal/app-binder/command/SignTIP712Command";
 import {
   PrimitiveType,
@@ -49,12 +50,12 @@ const PARSED: ParsedTypedData = {
 
 const makeApi = (sent: Command<unknown, unknown, unknown>[]): InternalApi =>
   ({
-    sendCommand: vi.fn(async (command: Command<unknown, unknown, unknown>) => {
+    sendCommand: vi.fn((command: Command<unknown, unknown, unknown>) => {
       sent.push(command);
       if (command instanceof SignTIP712Command) {
-        return CommandResultFactory({ data: SIGNATURE });
+        return Promise.resolve(CommandResultFactory({ data: SIGNATURE }));
       }
-      return CommandResultFactory({ data: undefined });
+      return Promise.resolve(CommandResultFactory({ data: undefined }));
     }),
   }) as unknown as InternalApi;
 
@@ -63,7 +64,7 @@ const parserReturning = (
 ): TypedDataParserService => ({ parse: vi.fn(() => value) });
 
 describe("SignTypedDataTask", () => {
-  it("streams sorted struct defs, then implementations, then signs", async () => {
+  it("initializes, streams sorted struct defs and implementations, then signs", async () => {
     const sent: Command<unknown, unknown, unknown>[] = [];
     const api = makeApi(sent);
 
@@ -73,9 +74,10 @@ describe("SignTypedDataTask", () => {
       parser: parserReturning(Right(PARSED)),
     }).run();
 
-    // struct defs first (Alpha before Zeta), each name followed by its fields;
-    // then domain root + message (array, field) implementations; then sign.
+    // INIT locks the signing path first. Struct defs follow (Alpha before Zeta),
+    // each name followed by its fields; then implementations and the final sign.
     expect(sent.map((c) => c.constructor.name)).toStrictEqual([
+      "InitTIP712Command",
       "SendTIP712StructDefinitionCommand", // Alpha (name)
       "SendTIP712StructDefinitionCommand", // Alpha.b (field)
       "SendTIP712StructDefinitionCommand", // Zeta (name)
@@ -85,11 +87,38 @@ describe("SignTypedDataTask", () => {
       "SendTIP712StructImplemCommand", // message field
       "SignTIP712Command",
     ]);
+    expect(sent[0]!.getApdu().getRawApdu().slice(5)).toStrictEqual(
+      sent.at(-1)!.getApdu().getRawApdu().slice(5),
+    );
 
     expect(isSuccessCommandResult(result)).toBe(true);
     if (isSuccessCommandResult(result)) {
       expect(result.data).toStrictEqual(SIGNATURE);
     }
+  });
+
+  it("short-circuits when session initialization is rejected", async () => {
+    const sent: Command<unknown, unknown, unknown>[] = [];
+    const api = {
+      sendCommand: vi.fn((command: Command<unknown, unknown, unknown>) => {
+        sent.push(command);
+        return Promise.resolve(
+          CommandResultFactory({
+            error: new Error("rejected") as never,
+          }),
+        );
+      }),
+    } as unknown as InternalApi;
+
+    const result = await new SignTypedDataTask(api, {
+      derivationPath: DERIVATION_PATH,
+      data: {} as TypedData,
+      parser: parserReturning(Right(PARSED)),
+    }).run();
+
+    expect(isSuccessCommandResult(result)).toBe(false);
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toBeInstanceOf(InitTIP712Command);
   });
 
   it("returns an error and sends nothing when parsing fails", async () => {
@@ -109,14 +138,17 @@ describe("SignTypedDataTask", () => {
   it("short-circuits when a struct definition is rejected", async () => {
     const sent: Command<unknown, unknown, unknown>[] = [];
     const api = {
-      sendCommand: vi.fn(
-        async (command: Command<unknown, unknown, unknown>) => {
-          sent.push(command);
-          return CommandResultFactory({
+      sendCommand: vi.fn((command: Command<unknown, unknown, unknown>) => {
+        sent.push(command);
+        if (command instanceof InitTIP712Command) {
+          return Promise.resolve(CommandResultFactory({ data: undefined }));
+        }
+        return Promise.resolve(
+          CommandResultFactory({
             error: new Error("rejected") as never,
-          });
-        },
-      ),
+          }),
+        );
+      }),
     } as unknown as InternalApi;
 
     const result = await new SignTypedDataTask(api, {
@@ -126,6 +158,6 @@ describe("SignTypedDataTask", () => {
     }).run();
 
     expect(isSuccessCommandResult(result)).toBe(false);
-    expect(sent).toHaveLength(1); // stops after the first failing struct def
+    expect(sent).toHaveLength(2); // INIT, then the first failing struct def
   });
 });

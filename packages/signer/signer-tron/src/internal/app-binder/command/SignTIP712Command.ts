@@ -14,7 +14,7 @@ import { CommandErrorHelper } from "@ledgerhq/signer-utils";
 import { Maybe } from "purify-ts";
 
 import { type Signature } from "@api/model/Signature";
-import { INS, LEDGER_CLA, P2 } from "@internal/app-binder/constants";
+import { INS, LEDGER_CLA, P1, P2 } from "@internal/app-binder/constants";
 import { encodeDerivationPath } from "@internal/shared/utils/encodeDerivationPath";
 
 import { parseSignature } from "./utils/parseSignature";
@@ -46,7 +46,7 @@ export class SignTIP712Command
     const apduArgs: ApduBuilderArgs = {
       cla: LEDGER_CLA,
       ins: INS.SIGN_TIP_712_MESSAGE,
-      p1: 0x00,
+      p1: P1.TIP712_SIGN,
       p2: P2.TIP712_FULL_IMPLEM,
     };
     return new ApduBuilder(apduArgs)

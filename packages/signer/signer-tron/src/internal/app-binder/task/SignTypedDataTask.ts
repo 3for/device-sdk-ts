@@ -1,6 +1,6 @@
 import {
   type CommandResult,
-  CommandResultFactory,
+  DmkResultFactory,
   type InternalApi,
   InvalidStatusWordError,
   isSuccessCommandResult,
@@ -8,6 +8,7 @@ import {
 
 import { type Signature } from "@api/model/Signature";
 import { type TypedData } from "@api/model/TypedData";
+import { InitTIP712Command } from "@internal/app-binder/command/InitTIP712Command";
 import {
   SendTIP712StructDefinitionCommand,
   StructDefinitionCommand,
@@ -31,8 +32,9 @@ export type SignTypedDataTaskArgs = {
 
 /**
  * Full TIP-712 signing flow (no clear-signing filters): parse the typed data,
- * stream struct definitions (0x1A), then domain + message implementations
- * (0x1C), then sign (0x0C P2=0x01).
+ * lock the signing path (0x0C P1=0x01), stream struct definitions (0x1A),
+ * then domain + message implementations (0x1C), then sign (0x0C P1=0x00,
+ * P2=0x01).
  */
 export class SignTypedDataTask {
   constructor(
@@ -43,13 +45,22 @@ export class SignTypedDataTask {
   async run(): Promise<CommandResult<Signature, TronErrorCodes>> {
     const parsed = this.args.parser.parse(this.args.data);
     if (parsed.isLeft()) {
-      return CommandResultFactory({
+      return DmkResultFactory({
         error: new InvalidStatusWordError(parsed.extract().message),
       });
     }
     const { types, domain, message } = parsed.unsafeCoerce();
 
-    // 1. Struct definitions, sorted by name for determinism.
+    // 1. Initialize the full-mode session and lock the signing path before
+    // uploading any schema or implementation data.
+    const initResult = await this.api.sendCommand(
+      new InitTIP712Command({ derivationPath: this.args.derivationPath }),
+    );
+    if (!isSuccessCommandResult(initResult)) {
+      return initResult;
+    }
+
+    // 2. Struct definitions, sorted by name for determinism.
     const sortedTypes = Object.entries(types).sort(([a], [b]) =>
       a.localeCompare(b),
     );
@@ -77,7 +88,7 @@ export class SignTypedDataTask {
       }
     }
 
-    // 2. Domain implementation, then 3. message implementation.
+    // 3. Domain implementation, then 4. message implementation.
     for (const value of [...domain, ...message]) {
       const implResult = await this.getImplementationTask(value).run();
       if (!isSuccessCommandResult(implResult)) {
@@ -85,7 +96,7 @@ export class SignTypedDataTask {
       }
     }
 
-    // 4. Sign.
+    // 5. Sign with the same derivation path locked during initialization.
     return this.api.sendCommand(
       new SignTIP712Command({ derivationPath: this.args.derivationPath }),
     );

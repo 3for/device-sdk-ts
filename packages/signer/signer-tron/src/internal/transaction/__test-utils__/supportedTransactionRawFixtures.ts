@@ -151,6 +151,46 @@ function proposalCreatePayload(): Uint8Array {
   );
 }
 
+function assetIssuePayload(): Uint8Array {
+  const frozenSupply = concatBytes(varintField(1, 100_000), varintField(2, 30));
+
+  return concatBytes(
+    bytesField(1, OWNER),
+    stringField(2, "LedgerAsset"),
+    stringField(3, "LAS"),
+    varintField(4, 1_000_000),
+    messageField(5, frozenSupply),
+    varintField(6, 1),
+    varintField(7, 6),
+    varintField(8, 100),
+    varintField(9, 2_000_000_000_000n),
+    varintField(10, 2_000_086_400_000n),
+    varintField(16, 1),
+    stringField(20, "Ledger TRC10 asset"),
+    stringField(21, "https://ledger.com/trc10"),
+    varintField(22, 1_000),
+    varintField(23, 10_000),
+  );
+}
+
+function createSmartContractPayload(): Uint8Array {
+  const newContract = concatBytes(
+    bytesField(1, OWNER),
+    bytesField(4, new Uint8Array(3_000).fill(0xff)),
+    varintField(5, 1_000_000),
+    varintField(6, 30),
+    stringField(7, "LedgerContract"),
+    varintField(8, 10_000_000),
+  );
+
+  return concatBytes(
+    bytesField(1, OWNER),
+    messageField(2, newContract),
+    varintField(3, 123),
+    varintField(4, 1_000_001),
+  );
+}
+
 function trc20TransferData(): Uint8Array {
   const encodedAddress = new Uint8Array(32);
   encodedAddress.set(RECIPIENT.slice(1), 12);
@@ -178,7 +218,8 @@ function buildRawData(
     varintField(8, 1_575_712_551_000n),
     messageField(11, contract),
     varintField(14, 1_575_712_492_061n),
-    ...(contractType === TronContractType.TriggerSmartContract
+    ...(contractType === TronContractType.TriggerSmartContract ||
+    contractType === TronContractType.CreateSmartContract
       ? [varintField(18, 100_000_000)]
       : []),
   );
@@ -198,6 +239,15 @@ function fixture(
 }
 
 export const SUPPORTED_TRANSACTION_RAW_FIXTURES = [
+  fixture(
+    TronContractType.AccountCreateContract,
+    "AccountCreateContract",
+    concatBytes(
+      bytesField(1, OWNER),
+      bytesField(2, RECIPIENT),
+      varintField(3, 0),
+    ),
+  ),
   fixture(
     TronContractType.TransferContract,
     "TransferContract",
@@ -234,11 +284,26 @@ export const SUPPORTED_TRANSACTION_RAW_FIXTURES = [
     concatBytes(bytesField(1, OWNER), stringField(2, "a".repeat(256))),
   ),
   fixture(
+    TronContractType.AssetIssueContract,
+    "AssetIssueContract",
+    assetIssuePayload(),
+  ),
+  fixture(
     TronContractType.WitnessUpdateContract,
     "WitnessUpdateContract",
     concatBytes(
       bytesField(1, OWNER),
       stringField(12, "https://ledger.com/witness"),
+    ),
+  ),
+  fixture(
+    TronContractType.ParticipateAssetIssueContract,
+    "ParticipateAssetIssueContract",
+    concatBytes(
+      bytesField(1, OWNER),
+      bytesField(2, RECIPIENT),
+      stringField(3, "1000001"),
+      varintField(4, 1_000_000),
     ),
   ),
   fixture(
@@ -271,6 +336,22 @@ export const SUPPORTED_TRANSACTION_RAW_FIXTURES = [
     ownerOnlyPayload(),
   ),
   fixture(
+    TronContractType.UnfreezeAssetContract,
+    "UnfreezeAssetContract",
+    ownerOnlyPayload(),
+  ),
+  fixture(
+    TronContractType.UpdateAssetContract,
+    "UpdateAssetContract",
+    concatBytes(
+      bytesField(1, OWNER),
+      stringField(2, "Updated TRC10 asset"),
+      stringField(3, "https://ledger.com/updated-trc10"),
+      varintField(4, 1_000),
+      varintField(5, 10_000),
+    ),
+  ),
+  fixture(
     TronContractType.ProposalCreateContract,
     "ProposalCreateContract",
     proposalCreatePayload(),
@@ -286,12 +367,31 @@ export const SUPPORTED_TRANSACTION_RAW_FIXTURES = [
     concatBytes(bytesField(1, OWNER), varintField(2, 10)),
   ),
   fixture(
+    TronContractType.SetAccountIdContract,
+    "SetAccountIdContract",
+    concatBytes(stringField(1, "account1"), bytesField(2, OWNER)),
+  ),
+  fixture(
+    TronContractType.CreateSmartContract,
+    "CreateSmartContract",
+    createSmartContractPayload(),
+  ),
+  fixture(
     TronContractType.TriggerSmartContract,
     "TriggerSmartContract",
     concatBytes(
       bytesField(1, OWNER),
       bytesField(2, RECIPIENT),
       bytesField(4, trc20TransferData()),
+    ),
+  ),
+  fixture(
+    TronContractType.UpdateSettingContract,
+    "UpdateSettingContract",
+    concatBytes(
+      bytesField(1, OWNER),
+      bytesField(2, RECIPIENT),
+      varintField(3, 50),
     ),
   ),
   fixture(
@@ -321,9 +421,23 @@ export const SUPPORTED_TRANSACTION_RAW_FIXTURES = [
     exchangePayload(true),
   ),
   fixture(
+    TronContractType.UpdateEnergyLimitContract,
+    "UpdateEnergyLimitContract",
+    concatBytes(
+      bytesField(1, OWNER),
+      bytesField(2, RECIPIENT),
+      varintField(3, 10_000_000),
+    ),
+  ),
+  fixture(
     TronContractType.AccountPermissionUpdateContract,
     "AccountPermissionUpdateContract",
     permissionPayload(),
+  ),
+  fixture(
+    TronContractType.ClearABIContract,
+    "ClearABIContract",
+    concatBytes(bytesField(1, OWNER), bytesField(2, RECIPIENT)),
   ),
   fixture(
     TronContractType.UpdateBrokerageContract,
